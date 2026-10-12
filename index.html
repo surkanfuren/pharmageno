@@ -1,0 +1,1346 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gene Passport</title>
+<meta name="description" content="Upload your genome once, get a gene passport, and see how any medicine fits your genes (CPIC guidelines).">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23111114'/%3E%3Cpath d='M13 9.5h6M13 16h6M13 22.5h6' stroke='%23fff' stroke-opacity='.35' stroke-width='1.6' stroke-linecap='round'/%3E%3Cpath d='M11 6.5c0 5.5 10 5.5 10 9.5s-10 4-10 9.5' stroke='%23fff' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3Cpath d='M21 6.5c0 5.5-10 5.5-10 9.5s10 4 10 9.5' stroke='%23FF5A1F' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #FAF9F6; --surface: #FFFFFF; --surface-2: #F4F3EF; --surface-3: #ECEAE4;
+    --ink: #111114; --ink-2: #3B3B44; --ink-3: #6F6F7A; --line: #E8E5DE; --line-2: #D8D4CB;
+    --brand: #FF5A1F; --brand-ink: #C2410C; --brand-soft: #FFF1EA; --ring: rgba(255, 90, 31, .16);
+    --navy: #141416; --foil: #FF7A45;
+    --red: #D63C3C; --red-ink: #9B1F1F; --red-soft: #FDEEEE; --red-line: #F5CDCD;
+    --amber: #D9890B; --amber-ink: #8A5800; --amber-soft: #FFF5E1;
+    --green: #15803D; --green-ink: #15803D; --green-soft: #E9F7EE; --green-line: #BFE5CB;
+    --gray: #A0A5AE; --gray-ink: #565C67; --gray-soft: #F1F1ED;
+    --radius: 20px;
+    --shadow-sm: 0 1px 2px rgba(16, 24, 40, .04), 0 1px 3px rgba(16, 24, 40, .05);
+    --shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 16px 40px -18px rgba(16, 24, 40, .18);
+    --font: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --serif: "Instrument Serif", ui-serif, Georgia, serif;
+    --ease: cubic-bezier(.2, .8, .2, 1);
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body { margin: 0; font-family: var(--font); font-size: 15px; line-height: 1.55; color: var(--ink); background: radial-gradient(rgba(17, 17, 20, .075) 1px, transparent 1.2px) 0 0 / 22px 22px, var(--bg); -webkit-font-smoothing: antialiased; }
+  ::selection { background: #DCE3FF; }
+  a { color: var(--brand-ink); text-underline-offset: 2px; }
+  code { font-family: var(--mono); font-size: .92em; }
+  .hidden { display: none !important; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .muted { color: var(--ink-3); font-size: 13px; }
+  .ic { width: 18px; height: 18px; flex: none; display: block; }
+  [data-ic] { display: inline-grid; place-items: center; }
+
+  /* ---------- Navigation ---------- */
+  .nav { position: sticky; top: 0; z-index: 30; padding: 12px 0; transition: padding .25s var(--ease); }
+  .nav-in { display: flex; align-items: center; gap: 20px; height: 52px; border-radius: 999px; border: 1px solid transparent; transition: background .25s, box-shadow .25s, border-color .25s, padding .25s; }
+  .nav.scrolled .nav-in { background: rgba(255, 255, 255, .86); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-color: var(--line); box-shadow: 0 10px 30px -18px rgba(17, 17, 20, .35); padding: 0 10px 0 18px; }
+  .brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; }
+  .brand .logo { width: 28px; height: 28px; flex: none; }
+  .wordmark { font-size: 18px; letter-spacing: -.035em; font-weight: 600; color: var(--brand); }
+  .wordmark b { font-weight: 600; color: var(--ink); }
+  .nav-status { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; min-width: 0; font-size: 13px; color: var(--ink-2); text-decoration: none; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px 5px 10px; box-shadow: var(--shadow-sm); }
+  .nav-status span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pulse { width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--gray); box-shadow: 0 0 0 3px rgba(160, 165, 174, .2); }
+  [data-state=ok] .pulse { background: var(--green); box-shadow: 0 0 0 3px rgba(29, 154, 91, .18); }
+  [data-state=warn] .pulse { background: var(--amber); box-shadow: 0 0 0 3px rgba(217, 137, 11, .2); }
+  [data-state=busy] .pulse { background: var(--brand); box-shadow: 0 0 0 3px var(--ring); animation: blink 1.1s ease-in-out infinite; }
+
+  /* ---------- Buttons ---------- */
+  .btn { appearance: none; font: inherit; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink); cursor: pointer; text-decoration: none; white-space: nowrap; transition: background .15s, border-color .15s, box-shadow .15s, transform .06s; }
+  .btn:hover { background: var(--surface-2); }
+  .btn:active { transform: translateY(1px); }
+  .btn:focus-visible, .chip:focus-visible { outline: none; box-shadow: 0 0 0 4px var(--ring); border-color: var(--brand); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+  .btn .ic { width: 16px; height: 16px; }
+  .btn.primary { background: var(--ink); border-color: var(--ink); color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16), 0 8px 20px -10px rgba(17, 17, 20, .6); }
+  .btn.primary:hover { background: #262D39; }
+  .btn.ghost { background: transparent; border-color: transparent; color: var(--ink-2); }
+  .btn.ghost:hover { background: var(--surface-3); color: var(--ink); }
+  .btn.on-dark { background: rgba(255, 255, 255, .08); border-color: rgba(255, 255, 255, .18); color: #fff; }
+  .btn.on-dark:hover { background: rgba(255, 255, 255, .15); }
+  .chip { appearance: none; font: inherit; font-size: 13px; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink-2); cursor: pointer; transition: border-color .15s, color .15s, background .15s; }
+  .chip:hover { border-color: var(--ink-3); color: var(--ink); }
+
+  main.wrap { padding-top: 40px; padding-bottom: 56px; min-height: calc(100vh - 220px); }
+  .view { animation: fade .35s var(--ease); }
+  .intro { position: relative; text-align: center; max-width: 860px; margin: 0 auto 34px; padding-top: 18px; }
+  .intro::before { content: ""; position: absolute; z-index: -1; left: 50%; top: 40px; width: 900px; height: 420px; transform: translateX(-50%); pointer-events: none;
+    background: radial-gradient(closest-side, rgba(255, 122, 69, .16), transparent); }
+  .eyebrow { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 26px; padding: 5px 14px 5px 5px; font-size: 13px; font-weight: 500; color: var(--ink); text-decoration: none; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; box-shadow: var(--shadow-sm); }
+  .eb-ic { width: 24px; height: 24px; border-radius: 50%; background: var(--ink); color: #fff; }
+  .eb-ic .ic { width: 13px; height: 13px; }
+  .eb-sep { width: 1px; height: 14px; background: var(--line-2); }
+  .eb-muted { color: var(--ink-3); font-weight: 400; }
+  .intro h1 { font-size: clamp(46px, 8.4vw, 100px); line-height: .98; letter-spacing: -.055em; font-weight: 600; margin: 0 0 26px; }
+  .intro h1 .serif { position: relative; display: inline-block; font-family: var(--serif); font-style: italic; font-weight: 400; letter-spacing: -.025em; font-size: 1.04em; padding: 0 .06em; }
+  .swoosh { position: absolute; left: 2%; bottom: -.1em; width: 96%; height: .22em; overflow: visible; }
+  .swoosh path { stroke: var(--brand); stroke-width: 5; fill: none; stroke-linecap: round; stroke-dasharray: 520; stroke-dashoffset: 520; animation: draw 1.1s .35s var(--ease) forwards; }
+  .intro p { font-size: 19px; line-height: 1.55; color: var(--ink-3); margin: 0 auto; max-width: 600px; }
+  .kicker { display: block; font-family: var(--mono); font-size: 11.5px; letter-spacing: .22em; text-transform: uppercase; color: var(--brand-ink); margin-bottom: 8px; }
+  .serif-em { font-family: var(--serif); font-style: italic; font-weight: 400; letter-spacing: -.01em; font-size: 1.12em; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+
+  /* ---------- DNA helix (loader + drop zone) ---------- */
+  .helix { display: flex; justify-content: center; gap: 7px; height: 70px; }
+  .helix i { position: relative; width: 7px; height: 100%; }
+  .helix i::before, .helix i::after { content: ""; position: absolute; left: 0; width: 7px; height: 7px; border-radius: 50%; animation: strandA 1.8s ease-in-out infinite; animation-delay: calc(var(--i) * -.13s); }
+  .helix i::before { top: 0; background: var(--brand); }
+  .helix i::after { bottom: 0; background: var(--ink); animation-name: strandB; }
+  .helix.calm i::before, .helix.calm i::after { animation-duration: 3.6s; }
+  @keyframes strandA { 0%, 100% { transform: translateY(0) scale(1); opacity: 1; } 50% { transform: translateY(63px) scale(.55); opacity: .55; } }
+  @keyframes strandB { 0%, 100% { transform: translateY(0) scale(.55); opacity: .55; } 50% { transform: translateY(-63px) scale(1); opacity: 1; } }
+
+  /* ---------- Drop zone ---------- */
+  .dropzone { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center; min-height: 250px; padding: 32px 24px; border-radius: 24px; cursor: pointer;
+    background: radial-gradient(600px 240px at 50% 0%, rgba(255, 122, 69, .07), transparent 70%), var(--surface); border: 1.5px dashed var(--line-2); box-shadow: 0 1px 2px rgba(17, 17, 20, .04), 0 24px 50px -30px rgba(17, 17, 20, .25); transition: border-color .2s, box-shadow .2s, transform .2s var(--ease); }
+  .dropzone:hover, .dropzone:focus-within { border-color: var(--brand); }
+  .dropzone.drag { border-color: var(--brand); border-style: solid; transform: scale(1.01); box-shadow: 0 0 0 6px var(--ring), var(--shadow); }
+  .dropzone input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+  .dropzone .helix { margin-bottom: 10px; pointer-events: none; }
+  .dropzone b { font-size: 20px; font-weight: 600; letter-spacing: -.02em; }
+  .dropzone small { color: var(--ink-3); font-size: 14px; max-width: 460px; }
+  .dropzone .btn { pointer-events: none; margin-top: 8px; }
+  .assure { display: flex; justify-content: center; gap: 22px; flex-wrap: wrap; margin: 18px 0 0; font-size: 13px; color: var(--ink-3); }
+  .assure span { display: inline-flex; align-items: center; gap: 7px; }
+  .assure .ic { width: 16px; height: 16px; color: var(--green); }
+  .err { margin: 18px auto 0; max-width: 640px; padding: 12px 14px; border-radius: 12px; background: var(--red-soft); border: 1px solid var(--red-line); color: var(--red-ink); text-align: center; }
+
+  /* ---------- Test genomes ---------- */
+  .samples { margin-top: 36px; }
+  .samples-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .samples-head h2 { margin: 0; font-size: 26px; letter-spacing: -.035em; font-weight: 600; line-height: 1.1; }
+  .samples-head p { margin: 2px 0 0; color: var(--ink-3); font-size: 13px; }
+  .samples-head .btn { height: 34px; font-size: 13px; }
+  .sample-list { border: 1px solid var(--line); border-radius: 16px; background: var(--surface); overflow: hidden; box-shadow: var(--shadow-sm); }
+  details.sample { border-top: 1px solid var(--line); transition: background .2s; }
+  details.sample:first-child { border-top: 0; }
+  details.sample > summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 74px minmax(0, 1fr) auto auto 10px; gap: 12px; align-items: center; padding: 9px 12px 9px 16px; }
+  details.sample > summary::-webkit-details-marker { display: none; }
+  details.sample > summary:hover { background: #FAFAF8; }
+  details.sample.picked { background: var(--brand-soft); animation: pop .5s var(--ease); }
+  .s-id { font-family: var(--mono); font-size: 13px; font-weight: 500; }
+  .s-label { font-size: 13px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .s-tag { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 999px; white-space: nowrap; background: var(--gray-soft); color: var(--gray-ink); }
+  .s-tag.ok { background: var(--green-soft); color: var(--green-ink); }
+  .s-zip { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 11px; border-radius: 8px; font-size: 12.5px; font-weight: 500; text-decoration: none; color: #fff; background: var(--ink); white-space: nowrap; }
+  .s-zip:hover { background: #262D39; }
+  .s-zip .ic { width: 14px; height: 14px; }
+  .s-zip code { color: rgba(255, 255, 255, .6); font-size: 11px; }
+  .s-zip.muted-zip { background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--line-2); }
+  .s-zip.muted-zip code { color: var(--ink-3); }
+  .s-body { padding: 2px 16px 14px 102px; font-size: 12.5px; color: var(--ink-2); animation: fade .25s ease; }
+  .s-body a { color: var(--ink-2); }
+  .s-links { display: flex; gap: 6px 14px; flex-wrap: wrap; margin-bottom: 8px; }
+  .s-links a { display: inline-flex; align-items: center; gap: 5px; }
+  .s-links .ic { width: 13px; height: 13px; }
+  .s-exp { display: flex; gap: 6px; flex-wrap: wrap; }
+  .s-exp span { font-family: var(--mono); font-size: 11px; padding: 2px 7px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--line); }
+  .s-exp span.flag { background: var(--amber-soft); border-color: transparent; color: var(--amber-ink); }
+  .s-sha { margin-top: 8px; font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); word-break: break-all; }
+
+  /* ---------- Processing ---------- */
+  .proc { max-width: 560px; margin: 24px auto 0; padding: 40px 36px 32px; text-align: center; background: var(--surface); border: 1px solid var(--line); border-radius: 28px; box-shadow: var(--shadow); }
+  .proc h2 { margin: 26px 0 4px; font-size: 24px; letter-spacing: -.025em; font-weight: 600; }
+  .proc .files { color: var(--ink-3); font-size: 13px; word-break: break-all; }
+  .bar-wrap { position: relative; height: 6px; margin: 26px 0 8px; border-radius: 999px; background: var(--surface-3); overflow: hidden; }
+  .bar-wrap span { position: absolute; inset: 0 auto 0 0; width: 0; border-radius: 999px; background: linear-gradient(90deg, var(--brand), #FFA36E); transition: width .5s var(--ease); }
+  .bar-wrap span::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .55), transparent); animation: shimmer 1.4s infinite; }
+  .steps { list-style: none; margin: 22px 0 0; padding: 0; text-align: left; display: grid; gap: 4px; }
+  .steps li { display: flex; gap: 14px; align-items: flex-start; padding: 10px 12px; border-radius: 12px; color: var(--ink-3); transition: background .3s, color .3s; }
+  .steps li b { display: block; font-weight: 500; font-size: 14.5px; }
+  .steps li small { display: block; font-size: 12.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .steps .dot { position: relative; flex: none; width: 22px; height: 22px; margin-top: 1px; border-radius: 50%; border: 1.5px solid var(--line-2); background: var(--surface); }
+  .steps li.active { color: var(--ink); background: var(--surface-2); }
+  .steps li.active .dot { border-color: var(--brand); border-right-color: transparent; animation: spin .8s linear infinite; }
+  .steps li.done { color: var(--ink); }
+  .steps li.done .dot { border-color: var(--green); background: var(--green); animation: pop .35s var(--ease); }
+  .steps li.done .dot::after { content: ""; position: absolute; left: 7px; top: 3.5px; width: 5px; height: 10px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+  .ticker { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; min-height: 30px; margin-top: 16px; }
+  .tick { font-family: var(--mono); font-size: 12px; padding: 4px 10px; border-radius: 999px; animation: pop .4s var(--ease) both; }
+  .tick.ok { background: var(--green-soft); color: var(--green-ink); }
+  .tick.unk { background: var(--gray-soft); color: var(--gray-ink); }
+
+  /* ---------- Passport ---------- */
+  .pp-note { margin: 0 0 16px; padding: 12px 14px; border-radius: 12px; background: var(--green-soft); border: 1px solid var(--green-line); color: var(--green-ink); font-size: 14px; }
+  .pp-doc { position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr) auto; gap: 22px; align-items: center; color: #E9ECF5; border-radius: 22px; padding: 22px 24px;
+    background: radial-gradient(90% 140% at 100% 0%, rgba(255, 90, 31, .32) 0%, transparent 55%), linear-gradient(160deg, #1C1A18 0%, #0F0E0D 100%);
+    box-shadow: 0 24px 50px -28px rgba(10, 20, 45, .6), inset 0 1px 0 rgba(255, 255, 255, .08); }
+  .pp-kicker { font-family: var(--mono); font-size: 10.5px; letter-spacing: .2em; color: var(--foil); }
+  .pp-title { font-size: 26px; font-weight: 600; letter-spacing: -.02em; line-height: 1.15; margin-top: 6px; color: #fff; }
+  .pp-badge { display: inline-block; margin-top: 10px; font-size: 11.5px; padding: 3px 10px; border-radius: 999px; background: rgba(255, 122, 69, .14); color: #FFC2A3; border: 1px solid rgba(255, 122, 69, .35); }
+  .pp-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 18px; padding-left: 22px; border-left: 1px solid rgba(255, 255, 255, .1); }
+  .pp-field label { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase; color: #A1A1AB; margin-bottom: 2px; }
+  .pp-field div { font-size: 14px; color: #fff; font-weight: 500; }
+  .pp-field code { font-size: 12.5px; white-space: nowrap; }
+  .pp-side { display: flex; align-items: center; gap: 14px; }
+  #qr { background: #fff; padding: 6px; border-radius: 10px; line-height: 0; flex: none; }
+  #qr img, #qr canvas { width: 76px; height: 76px; }
+  .pp-actions { display: grid; gap: 8px; }
+  .pp-actions .btn { height: 36px; justify-content: flex-start; }
+  .share, .share-err { grid-column: 1 / -1; margin: 0; }
+  .share { padding: 12px; border-radius: 12px; background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .14); }
+  .share label { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase; color: #A1A1AB; margin-bottom: 6px; }
+  .share-row { display: flex; gap: 6px; }
+  .share input { flex: 1; min-width: 0; height: 36px; padding: 0 10px; font: inherit; font-family: var(--mono); font-size: 12px; color: #fff; background: rgba(0, 0, 0, .25); border: 1px solid rgba(255, 255, 255, .14); border-radius: 8px; }
+  .share .btn { height: 36px; }
+  .share p { margin: 8px 0 0; font-size: 12px; color: #9AA6C4; }
+  .share-err { padding: 10px 12px; border-radius: 10px; font-size: 13px; color: #FFD1D1; background: rgba(214, 60, 60, .18); border: 1px solid rgba(214, 60, 60, .4); }
+  .pp-main { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 24px; margin-top: 24px; align-items: start; }
+  .genes-panel { position: sticky; top: 80px; }
+  .gl-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+  .gl-head h2 { margin: 0; font-size: 17px; font-weight: 600; letter-spacing: -.015em; }
+  .gl-sum { display: flex; gap: 6px; flex-wrap: wrap; }
+  .genes { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--surface); }
+  details.gene { border-top: 1px solid var(--line); }
+  details.gene:first-child { border-top: 0; }
+  details.gene > summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 78px minmax(0, 1fr) auto 10px; gap: 10px; align-items: center; padding: 10px 14px; transition: background .15s; }
+  details.gene > summary::-webkit-details-marker, details.drug > summary::-webkit-details-marker { display: none; }
+  details.gene > summary:hover { background: #FAFAF8; }
+  .g-sym { font-family: var(--mono); font-size: 13px; font-weight: 500; }
+  .g-dip { font-family: var(--mono); font-size: 12px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .g-body { padding: 0 14px 12px 102px; font-size: 13px; color: var(--ink-2); animation: fade .25s ease; }
+  .g-body p { margin: 0 0 4px; }
+  .g-body .src { font-size: 11.5px; color: var(--ink-3); }
+  .chev { width: 7px; height: 7px; border-right: 1.5px solid var(--ink-3); border-bottom: 1.5px solid var(--ink-3); transform: rotate(45deg); transition: transform .2s var(--ease); justify-self: center; margin-top: -3px; }
+  details[open] > summary .chev { transform: rotate(-135deg); margin-top: 3px; }
+  .state { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 500; padding: 3px 9px 3px 7px; border-radius: 999px; white-space: nowrap; }
+  .state::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .state.ok { background: var(--green-soft); color: var(--green-ink); }
+  .state.flag { background: var(--amber-soft); color: var(--amber-ink); }
+  .state.unk { background: var(--gray-soft); color: var(--gray-ink); }
+  details.more { margin-top: 8px; }
+  details.more > summary, details.tech > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); font-size: 12.5px; font-weight: 500; color: var(--ink-2); user-select: none; }
+  details.more > summary::-webkit-details-marker, details.tech > summary::-webkit-details-marker { display: none; }
+  details.more > summary::before, details.tech > summary::before { content: ""; flex: none; width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg); transition: transform .15s; }
+  details[open].more > summary::before, details[open].tech > summary::before { transform: rotate(45deg); }
+  details.more .genes { margin-top: 8px; }
+  details.tech { margin-top: 10px; font-size: 13px; color: var(--ink-2); }
+  details.tech > :not(summary) { margin: 10px 4px 0; }
+  details.tech p { margin: 0 0 8px; }
+  .table-wrap { overflow-x: auto; }
+  details.tech table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  details.tech th { text-align: left; font-weight: 500; color: var(--ink-3); border-bottom: 1px solid var(--line); padding: 6px 8px; }
+  details.tech td { border-bottom: 1px solid var(--line); padding: 8px; vertical-align: top; }
+  details.tech td:first-child { font-family: var(--mono); color: var(--ink); }
+  .pp-meta { margin-top: 10px; font-size: 12px; } .pp-meta p { margin: 0 0 4px; font-size: 12px; }
+  .reveal .pp-doc { animation: card-in .8s var(--ease) both; }
+  .reveal .rx, .reveal .genes-panel { animation: rise .6s var(--ease) both; }
+  .reveal .genes-panel { animation-delay: .12s; }
+
+  /* ---------- Medicine check ---------- */
+  .rx { padding: 22px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+  .rx-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+  .rx-head h2 { margin: 0; font-size: 20px; letter-spacing: -.025em; font-weight: 600; }
+  .search { position: relative; display: flex; align-items: center; gap: 10px; padding: 5px 5px 5px 14px; border: 1px solid var(--line-2); border-radius: 14px; background: var(--surface); transition: border-color .15s, box-shadow .15s; }
+  .search:focus-within { border-color: var(--brand); box-shadow: 0 0 0 4px var(--ring); }
+  .search > [data-ic] { color: var(--ink-3); }
+  .search input { flex: 1; min-width: 0; height: 42px; border: 0; outline: 0; font: inherit; font-size: 16px; background: transparent; color: var(--ink); }
+  .search input::placeholder { color: var(--ink-3); }
+  .suggest { position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 20; list-style: none; margin: 0; padding: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); animation: fade .15s ease; }
+  .suggest li { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+  .suggest li small { color: var(--ink-3); font-size: 12px; text-align: right; }
+  .suggest li.active, .suggest li:hover { background: var(--surface-2); }
+  .suggest mark { background: none; color: var(--brand-ink); font-weight: 600; }
+  .legend { display: flex; gap: 6px 14px; flex-wrap: wrap; margin-top: 12px; font-size: 12px; color: var(--ink-2); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 12px; font-size: 12.5px; color: var(--ink-3); }
+  .chip { font-size: 12.5px; padding: 4px 11px; }
+  .rx-empty { margin-top: 18px; padding: 22px 16px; border: 1px dashed var(--line-2); border-radius: 14px; text-align: center; color: var(--ink-3); font-size: 14px; }
+  .wait { color: var(--ink-3); display: inline-flex; align-items: center; gap: 8px; }
+  .wait::before { content: ""; width: 12px; height: 12px; border-radius: 50%; flex: none; border: 2px solid currentColor; border-right-color: transparent; animation: spin .7s linear infinite; }
+  p.wait { display: flex; margin: 18px 0 0; padding: 12px 14px; border: 1px solid var(--line); background: var(--surface-2); border-radius: 12px; color: var(--ink-2); }
+  #out .err { text-align: left; max-width: none; }
+  .summary { margin: 20px 0 12px; display: grid; gap: 10px; }
+  .summary h3 { margin: 0; font-size: 16px; letter-spacing: -.015em; font-weight: 600; }
+  .summary h3 b { color: var(--brand); font-weight: 600; }
+  .bar { display: flex; gap: 3px; height: 6px; border-radius: 999px; overflow: hidden; }
+  .bar span { display: block; border-radius: 2px; animation: grow .6s var(--ease) both; transform-origin: left; }
+  .tally { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12.5px; color: var(--ink-2); }
+  .tally span { display: inline-flex; align-items: center; gap: 7px; }
+  .tally i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .bar .red, .tally .red, .legend .red { background: var(--red); } .bar .yellow, .tally .yellow, .legend .yellow { background: var(--amber); }
+  .bar .green, .tally .green, .legend .green { background: var(--green); } .bar .gray, .tally .gray, .legend .gray { background: var(--gray); }
+  .results { display: grid; gap: 8px; }
+  details.drug { --tone: var(--gray); --tone-soft: var(--gray-soft); --tone-ink: var(--gray-ink);
+    position: relative; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); overflow: hidden; animation: rise .4s var(--ease) both; transition: box-shadow .2s; }
+  details.drug::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--tone); }
+  details.drug[open] { box-shadow: var(--shadow-sm); }
+  details.drug.red { --tone: var(--red); --tone-soft: var(--red-soft); --tone-ink: var(--red-ink); }
+  details.drug.yellow { --tone: var(--amber); --tone-soft: var(--amber-soft); --tone-ink: var(--amber-ink); }
+  details.drug.green { --tone: var(--green); --tone-soft: var(--green-soft); --tone-ink: var(--green-ink); }
+  details.drug > summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 34px minmax(0, 1fr) auto 10px; gap: 12px; align-items: center; padding: 11px 14px 11px 16px; }
+  details.drug > summary:hover { background: #FAFAF8; }
+  .d-ic { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--tone-soft); color: var(--tone); }
+  .d-ic .ic { width: 18px; height: 18px; }
+  .d-main { min-width: 0; }
+  .d-name { display: block; font-size: 15px; font-weight: 600; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .d-line { display: block; font-size: 12.5px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .d-line b { font-weight: 500; color: var(--tone-ink); }
+  .verdict { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; padding: 4px 10px 4px 8px; border-radius: 999px; background: var(--tone-soft); color: var(--tone-ink); white-space: nowrap; }
+  .verdict::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--tone); }
+  .d-body { padding: 0 16px 14px 62px; animation: fade .25s ease; }
+  .d-body p { margin: 4px 0; color: var(--ink-2); font-size: 14px; }
+  .ask { display: flex; gap: 10px; align-items: flex-start; margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); font-size: 14px; }
+  .ask .ic { color: var(--ink-2); margin-top: 2px; }
+  .ask b { display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3); font-weight: 600; margin-bottom: 2px; }
+  .ask span { color: var(--ink); }
+  .d-safe { font-size: 12px !important; color: var(--ink-3) !important; margin-top: 8px !important; }
+  .d-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 10px; font-size: 12px; color: var(--ink-3); }
+  .gtag { font-family: var(--mono); font-size: 11px; padding: 1px 7px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--line); color: var(--ink-2); }
+  .gtag.miss { border-style: dashed; color: var(--ink-3); }
+  #timing { margin-top: 12px; font-size: 12px; }
+  .again { display: flex; justify-content: center; margin-top: 28px; }
+
+  /* ---------- Test-provider strip ---------- */
+  .formats { margin-top: 34px; text-align: center; }
+  .formats p { margin: 0 0 14px; font-size: 14px; color: var(--ink-3); }
+  .formats .fine { margin: 10px 0 0; font-size: 11.5px; color: var(--ink-3); }
+  .marquee { overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+  .track { display: flex; gap: 10px; width: max-content; animation: marquee 38s linear infinite; }
+  .marquee:hover .track { animation-play-state: paused; }
+  .provider { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); white-space: nowrap; font-weight: 600; font-size: 14px; letter-spacing: -.01em; color: var(--ink); }
+  .provider small { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--ink-3); }
+  .provider.today small { background: var(--green-soft); color: var(--green-ink); }
+  @keyframes marquee { to { transform: translateX(-50%); } }
+
+  /* ---------- Footer ---------- */
+  footer { border-top: 1px solid var(--line); }
+  .foot { display: grid; gap: 14px; padding-top: 24px; padding-bottom: 40px; font-size: 13px; color: var(--ink-3); }
+  .foot p { margin: 0; }
+  .foot .data { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .foot details.tech { margin: 0; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes pop { 0% { opacity: 0; transform: scale(.85); } 60% { transform: scale(1.04); } 100% { opacity: 1; transform: none; } }
+  @keyframes card-in { from { opacity: 0; transform: perspective(900px) rotateX(14deg) translateY(24px) scale(.96); } to { opacity: 1; transform: none; } }
+  @keyframes grow { from { transform: scaleX(0); } to { transform: none; } }
+  @keyframes shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+  @keyframes blink { 50% { opacity: .35; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } html { scroll-behavior: auto; } }
+
+  @media (max-width: 900px) {
+    .pp-doc { grid-template-columns: 1fr; gap: 16px; }
+    .pp-fields { padding-left: 0; border-left: 0; }
+    .pp-main { grid-template-columns: 1fr; }
+    .genes-panel { position: static; }
+  }
+  @media (max-width: 640px) {
+    .wrap { padding: 0 16px; }
+    main.wrap { padding-top: 28px; }
+    .dropzone { min-height: 240px; }
+    .proc { padding: 32px 20px 24px; }
+    .rx { padding: 18px 14px; }
+    .d-body { padding: 0 14px 14px 16px; }
+    .g-body { padding-left: 14px; }
+    details.drug > summary { grid-template-columns: minmax(0, 1fr) auto 10px; }
+    details.drug .d-ic { display: none; }
+    .nav-status span:last-child { max-width: 140px; }
+    details.sample > summary { grid-template-columns: 70px minmax(0, 1fr) auto 10px; }
+    details.sample .s-tag { display: none; }
+    .s-body { padding-left: 16px; }
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="logoTile" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2A2A2E"/><stop offset="1" stop-color="#0E0E10"/></linearGradient>
+  <symbol id="logo" viewBox="0 0 32 32">
+    <rect width="32" height="32" rx="9" fill="url(#logoTile)"/>
+    <path d="M13 9.5h6M13 16h6M13 22.5h6" stroke="#fff" stroke-opacity=".35" stroke-width="1.6" stroke-linecap="round"/>
+    <path d="M11 6.5c0 5.5 10 5.5 10 9.5s-10 4-10 9.5" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    <path d="M21 6.5c0 5.5-10 5.5-10 9.5s10 4 10 9.5" stroke="#FF5A1F" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+  </symbol>
+</defs></svg>
+<header class="nav">
+  <div class="wrap nav-in">
+    <a class="brand" href="./" aria-label="Gene Passport home"><svg class="logo"><use href="#logo"/></svg><span class="wordmark"><b>gene</b>passport</span></a>
+    <a class="nav-status" id="navStatus" href="#data" data-state="busy"><span class="pulse"></span><span id="navStatusText">Checking CPIC data…</span></a>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- 1. IMPORT: one path, one drop zone -->
+  <section class="view" id="importView">
+    <div class="intro">
+      <a class="eyebrow" href="#samplesSection"><span class="eb-ic" data-ic="dna"></span>Checked against CPIC guidelines<span class="eb-sep"></span><span class="eb-muted">10 real test genomes</span></a>
+      <h1>One genome.<br><span class="serif">Every prescription.<svg class="swoosh" viewBox="0 0 500 24" preserveAspectRatio="none" aria-hidden="true"><path d="M6 15 C 90 6, 190 3, 280 8 S 430 18, 494 9"/></svg></span></h1>
+      <p>Drop your genome once. We read the genes that change how medicines work, build your gene passport, and show how any medicine you type fits you.</p>
+    </div>
+    <label class="dropzone" id="dropzone">
+      <input type="file" id="genomeFiles" multiple accept=".vcf,.gz,.bgz,.bed,.zip">
+      <div class="helix calm" aria-hidden="true"></div>
+      <b>Drop your genome here</b>
+      <small>Your genome's .vcf.gz together with its confident-regions .bed, or one .zip holding both. Drop everything at once; we sort it out.</small>
+      <span class="btn primary"><span data-ic="upload"></span>Choose files</span>
+    </label>
+    <div class="assure">
+      <span><span data-ic="check"></span>Read with fixed rules, no AI</span>
+      <span><span data-ic="check"></span>Upload deleted right after reading</span>
+      <span><span data-ic="check"></span>Every result checked against CPIC</span>
+    </div>
+    <div id="importOut"></div>
+
+    <div class="formats">
+      <p>Whole-genome files work today. Consumer and clinical DNA tests are on the way.</p>
+      <div class="marquee"><div class="track"><span class="provider today">Whole-genome VCF + BED<small>Live</small></span><span class="provider">23andMe<small>Soon</small></span><span class="provider">AncestryDNA<small>Soon</small></span><span class="provider">MyHeritage DNA<small>Soon</small></span><span class="provider">FamilyTreeDNA<small>Soon</small></span><span class="provider">Living DNA<small>Soon</small></span><span class="provider">Nebula Genomics<small>Soon</small></span><span class="provider">Dante Labs<small>Soon</small></span><span class="provider">Sequencing.com<small>Soon</small></span><span class="provider">24Genetics<small>Soon</small></span><span class="provider">CircleDNA<small>Soon</small></span><span class="provider">Clinical PGx lab reports<small>Soon</small></span><span aria-hidden="true" style="display:contents"><span class="provider today">Whole-genome VCF + BED<small>Live</small></span><span class="provider">23andMe<small>Soon</small></span><span class="provider">AncestryDNA<small>Soon</small></span><span class="provider">MyHeritage DNA<small>Soon</small></span><span class="provider">FamilyTreeDNA<small>Soon</small></span><span class="provider">Living DNA<small>Soon</small></span><span class="provider">Nebula Genomics<small>Soon</small></span><span class="provider">Dante Labs<small>Soon</small></span><span class="provider">Sequencing.com<small>Soon</small></span><span class="provider">24Genetics<small>Soon</small></span><span class="provider">CircleDNA<small>Soon</small></span><span class="provider">Clinical PGx lab reports<small>Soon</small></span></span></div></div>
+      <p class="fine">Company names describe the files their customers can download. Gene Passport is not affiliated with them.</p>
+    </div>
+
+    <section class="samples" id="samplesSection">
+      <div class="samples-head">
+        <div>
+          <span class="kicker">Test genomes</span>
+          <h2>No genome at hand? Try a <span class="serif-em">real</span> one.</h2>
+          <p>Ten people whose genomes were released for research. Download a .zip and drop it above; open a row for its sources and expected result.</p>
+        </div>
+        <button class="btn" id="randomPick"><span data-ic="shuffle"></span>Pick one for me</button>
+      </div>
+      <div class="sample-list" id="samples"><p class="muted" style="padding:14px 16px;margin:0">Loading test genomes…</p></div>
+    </section>
+  </section>
+
+  <!-- 2. PROCESSING -->
+  <section class="view hidden" id="procView">
+    <div class="proc">
+      <div class="helix" aria-hidden="true"></div>
+      <h2>Building your gene passport</h2>
+      <div class="files" id="procFiles"></div>
+      <div class="bar-wrap"><span id="procBar"></span></div>
+      <ol class="steps">
+        <li id="st-upload"><span class="dot"></span><div><b>Uploading your genome</b><small>Waiting…</small></div></li>
+        <li id="st-read"><span class="dot"></span><div><b>Reading every variant</b><small>Fixed rules, no AI</small></div></li>
+        <li id="st-match"><span class="dot"></span><div><b>Finding medicine-related genes</b><small>Matching CPIC gene definitions</small></div></li>
+        <li id="st-issue"><span class="dot"></span><div><b>Issuing your passport</b><small>Results, sources and guideline version</small></div></li>
+      </ol>
+      <div class="ticker" id="ticker"></div>
+    </div>
+  </section>
+
+  <!-- 3. PASSPORT + MEDICINES -->
+  <section class="view hidden" id="passportView">
+    <p class="pp-note hidden" id="passportNote"></p>
+    <div class="pp-doc">
+      <div>
+        <div class="pp-kicker">GENE PASSPORT · PGx</div>
+        <div class="pp-title" id="passportName">Imported genome</div>
+        <span class="pp-badge" id="identityBadge">genome file · not clinically validated</span>
+      </div>
+      <div class="pp-fields">
+        <div class="pp-field"><label>Passport no.</label><div><code id="pid">-</code></div></div>
+        <div class="pp-field"><label>Issued</label><div id="issued">-</div></div>
+        <div class="pp-field"><label>Genes identified</label><div id="geneCount">-</div></div>
+        <div class="pp-field"><label>Guideline</label><div>CPIC</div></div>
+      </div>
+      <div class="pp-side">
+        <div id="qr" title="Passport ID"></div>
+        <div class="pp-actions">
+          <button class="btn on-dark" id="passportShare"><span data-ic="share"></span>Share link</button>
+          <button class="btn on-dark" id="passportSave" title="Download passport with source history (JSON)"><span data-ic="download"></span>Download</button>
+        </div>
+      </div>
+      <p class="share-err hidden" id="shareErr"></p>
+      <div class="share hidden" id="shareOut">
+        <label for="shareUrl">Shareable link</label>
+        <div class="share-row"><input id="shareUrl" readonly><button class="btn on-dark" id="shareCopy"><span data-ic="copy"></span>Copy</button></div>
+        <p>Show the QR code at a clinic or pharmacy: anyone with the link can view this passport and check medicines against it.</p>
+      </div>
+    </div>
+
+    <div class="pp-main">
+      <section class="rx" id="rxCard">
+        <div class="rx-head"><h2>Check a medicine</h2><span class="muted">CPIC gene guidance for 100+ medicines</span></div>
+        <div class="search"><span data-ic="pill"></span><input id="drugs" placeholder="Type a medicine, e.g. Plavix or clopidogrel" autocomplete="off" aria-label="Medicines" aria-autocomplete="list" aria-controls="suggest"><button class="btn primary" id="check">Check</button>
+          <ul class="suggest hidden" id="suggest" role="listbox"></ul></div>
+        <div class="legend"><span><i class="red"></i>Avoid / caution</span><span><i class="yellow"></i>Adjust, or info missing</span><span><i class="green"></i>Standard use</span><span><i class="gray"></i>No gene guidance</span></div>
+        <div class="chips"><span>Try</span><button class="chip" data-drug="Plavix">Plavix</button><button class="chip" data-drug="Lipitor">Lipitor</button><button class="chip" data-drug="Codeine">Codeine</button><button class="chip" data-drug="Coumadin">Coumadin</button><button class="chip" data-drug="Xeloda">Xeloda</button><button class="chip" data-drug="Imuran">Imuran</button><button class="chip" data-drug="Plavix, Lipitor, Coumadin, Xeloda, Imuran, Aspirin">All of these</button></div>
+        <div id="out"></div>
+      </section>
+      <aside class="genes-panel">
+        <div class="gl-head"><h2>Your genes</h2><div class="gl-sum" id="geneSummary"></div></div>
+        <div class="genes" id="genes"></div>
+        <details class="more hidden" id="moreGenes"><summary id="moreSummary"></summary><div class="genes" id="genesMore"></div></details>
+        <div class="pp-meta"><p id="passportVersion" class="muted"></p><p id="passportImpact" class="muted"></p></div>
+        <details class="tech hidden" id="genomeDetails"></details>
+      </aside>
+    </div>
+    <div class="again"><button class="btn ghost" id="restart"><span data-ic="upload"></span>Import another genome</button></div>
+  </section>
+</main>
+
+<footer id="data">
+  <div class="wrap foot">
+    <p>Source: CPIC guidelines (cpicpgx.org). This is not a diagnosis or treatment advice. Don't stop or change a medicine on your own; always talk to your doctor.</p>
+    <div class="data"><span id="resourceStatus">Checking which CPIC data this server uses...</span><button class="btn" id="resourceCheck"><span data-ic="refresh"></span>Check for updates</button><button class="btn" id="resourceActivate" disabled>Use reviewed update</button></div>
+    <details class="tech"><summary>Guideline data: source versions and update review</summary><div id="resourceDetails"></div>
+      <p>CPIC supplies the medicine verdicts. A current source does not make an incomplete genetic result complete.</p></details>
+  </div>
+</footer>
+
+<script>
+const CPIC = "https://api.cpicpgx.org/v1";
+let cpicContext = null, resourceStatus = null, legacyCPIC = false, resourceBusy = false;
+let passportProvenance = null, passportReview = null;
+const get = async (path, params) => {
+  if (!cpicContext && !legacyCPIC) await prepareResources();
+  const snapshot = cpicContext?.snapshot_id;
+  const query = new URLSearchParams(params);
+  if (snapshot) query.set("snapshot", snapshot);
+  const r = await fetch(`${snapshot ? "/api/cpic" : CPIC}/${path}?${query}`);
+  if (!r.ok) throw new Error(`CPIC ${path} → ${r.status}`);
+  return r.json();
+};
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+// Line icons (24px grid, stroke = currentColor); static markup uses <span data-ic="name">
+const IC = {
+  file: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',
+  dna: '<path d="m10 16 1.5 1.5M14 8l-1.5-1.5M15 2c-1.8 2-2.5 4-2.8 6M16.5 10.5l1 1M17 6l-2.9-2.9M2 15c6.7-6 13.3 0 20-6M20 9l.9.9M3.1 14.1 4 15M6.5 12.5l1 1M7 18l2.9 2.9M9 22c1.8-2 2.5-4 2.8-6"/>',
+  layers: '<path d="m12 3 9 5-9 5-9-5 9-5z"/><path d="m3 13 9 5 9-5"/>',
+  zap: '<path d="M13 3 4 14h7l-1 7 9-11h-7l1-7z"/>',
+  upload: '<path d="M12 15V4M7 9l5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/>',
+  download: '<path d="M12 4v11M7 10l5 5 5-5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/>',
+  arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+  shield: '<path d="M12 3 5 6v6c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9V6l-7-3z"/><path d="m9 12 2 2 4-4"/>',
+  octagon: '<path d="M8.5 3h7L21 8.5v7L15.5 21h-7L3 15.5v-7L8.5 3z"/><path d="M12 8v5M12 16.5v.01"/>',
+  triangle: '<path d="M10.3 4.2 2.6 18a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 4.2a2 2 0 0 0-3.4 0z"/><path d="M12 9.5v4M12 17v.01"/>',
+  check: '<circle cx="12" cy="12" r="9"/><path d="m8.5 12.2 2.4 2.4 4.6-5"/>',
+  help: '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.9.7c0 1.7-2.5 2.1-2.5 3.6M12 16.8v.01"/>',
+  minus: '<circle cx="12" cy="12" r="9"/><path d="M8 12h8"/>',
+  refresh: '<path d="M20 11a8 8 0 0 0-14.6-4.4L4 8"/><path d="M4 4v4h4M4 13a8 8 0 0 0 14.6 4.4L20 16"/><path d="M20 20v-4h-4"/>',
+  pill: '<path d="M10.5 3.5a5 5 0 0 1 7 7l-7 7a5 5 0 0 1-7-7l7-7z"/><path d="m8.5 8.5 7 7"/>',
+  chat: '<path d="M5 4h14a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-5 4V5a1 1 0 0 1 1-1z"/><path d="M8.5 9h7M8.5 12h4"/>',
+  db: '<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"/>',
+  lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  share: '<path d="M10 14a4 4 0 0 0 5.7.4l3-3a4 4 0 0 0-5.7-5.7l-1.6 1.6"/><path d="M14 10a4 4 0 0 0-5.7-.4l-3 3a4 4 0 0 0 5.7 5.7l1.6-1.6"/>',
+  shuffle: '<path d="M16 4h4v4M4 20l16-16M20 16v4h-4M15 15l5 5M4 4l5 5"/>',
+  external: '<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
+  copy: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>',
+};
+const icon = name => `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[name]}</svg>`;
+document.querySelectorAll("[data-ic]").forEach(el => el.insertAdjacentHTML("afterbegin", icon(el.dataset.ic)));
+document.querySelectorAll(".helix").forEach(h => h.innerHTML = Array.from({ length: 18 }, (_, i) => `<i style="--i:${i}"></i>`).join(""));
+
+// Header pill mirrors the CPIC data status
+function setNav(state, text) {
+  $("navStatus").dataset.state = state;
+  $("navStatusText").textContent = text;
+}
+const NAV = {
+  current_as_of_check: ["ok", "CPIC data current"], update_available: ["warn", "CPIC update available"],
+  unverified: ["warn", "CPIC data unverified"], stale: ["warn", "CPIC check needed"],
+};
+
+async function localJSON(path, body) {
+  const response = await fetch(path, body === undefined ? {} : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  if (response.status === 404) throw new Error("This server does not support resource versions. Use the updated test server on port 8010.");
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || `Resource request failed (${response.status})`);
+  return data;
+}
+function resourceLabel(status) {
+  const time = status.checked_at ? new Date(status.checked_at).toLocaleString() : "not yet checked";
+  if (status.freshness === "current_as_of_check") return `CPIC data matched the live source when checked on ${time}.`;
+  if (status.freshness === "update_available") return `A CPIC update is available. The saved version stays in use until the update is reviewed.`;
+  if (status.freshness === "unverified") return `Could not verify whether CPIC data are current. ${status.active ? "Using the saved version." : "No verified saved version is available."}`;
+  if (status.freshness === "stale") return `The saved CPIC version needs a new freshness check. Last successful check: ${time}.`;
+  return status.checking ? "Downloading and checking CPIC data..." : "No CPIC snapshot yet. Check for updates to create the first version.";
+}
+function renderResources(status) {
+  resourceStatus = status;
+  $("resourceStatus").textContent = resourceLabel(status);
+  setNav(...(NAV[status.freshness] || (status.checking ? ["busy", "Checking CPIC data…"] : ["idle", "CPIC data not loaded"])));
+  $("resourceActivate").disabled = resourceBusy || !status.candidate || ["unverified", "stale"].includes(status.freshness);
+  const impact = status.candidate ? status.impact : null;
+  $("resourceDetails").innerHTML = `<p>Active snapshot: ${esc(status.active?.snapshot_id || "none")}<br>Last successful live-data check: ${esc(status.checked_at || "none")}<br>Published release observed: ${esc(status.latest_release?.tag || "unavailable")} (this does not identify an exact live-API release)</p>
+    ${status.error ? `<p class="err">${esc(status.error)}</p>` : ""}
+    ${status.latest_release?.error ? `<p>Published-release check unavailable: ${esc(status.latest_release.error)}</p>` : ""}
+    ${impact ? `<p>Staged snapshot: ${esc(status.candidate.snapshot_id)}</p><p>Changed resources: ${esc(impact.changed_tables.join(", "))}</p><p>Affected genes: ${esc(impact.affected_genes.join(", ") || "none identified")}</p><p>Affected medicines: ${esc(impact.affected_drugs.join(", ") || "none identified")}</p><p>${impact.genome_reanalysis_required ? "Original genome reanalysis may be needed. " : ""}${impact.gene_result_review_required ? "Gene results may need a new interpretation. " : ""}${impact.drug_recheck_required ? "Medicine checks need to be run again." : ""}</p><p>Automated data checks passed: ${esc(status.candidate.validation.checks.join(", "))}. These checks do not establish clinical accuracy.</p>` : ""}`;
+}
+async function refreshResources() {
+  const response = await fetch("/api/cpic/status");
+  if (response.status === 404) {
+    legacyCPIC = true;
+    $("resourceStatus").textContent = "This demo server uses live CPIC lookups without stored versions. Use port 8010 for versioned passports.";
+    $("resourceActivate").disabled = true;
+    setNav("ok", "Live CPIC lookups");
+    return null;
+  }
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || "Could not check resource status");
+  renderResources(data);
+  return data;
+}
+async function prepareResources() {
+  let status = await refreshResources();
+  if (!status) { cpicContext = null; return null; }
+  if (["uninitialized", "stale"].includes(status.freshness)) {
+    $("resourceStatus").textContent = "Checking current CPIC data before this analysis...";
+    status = await localJSON("/api/cpic/check", {});
+    renderResources(status);
+  }
+  if (!status.active) throw new Error("No verified CPIC snapshot is available. Check for updates and retry.");
+  cpicContext = status.active;
+  return status;
+}
+function currentProvenance() {
+  return cpicContext ? { snapshot_id: cpicContext.snapshot_id, source: cpicContext.source,
+    retrieved_at: cpicContext.retrieved_at, checked_at: resourceStatus?.checked_at,
+    freshness_at_analysis: resourceStatus?.freshness, release: cpicContext.release,
+    table_hashes: cpicContext.table_hashes, caller_version: "legacy-panel-1.0",
+    consistency: cpicContext.consistency } : null;
+}
+async function reviewPassportVersion() {
+  if (!resourceStatus?.active) return null;
+  const report = await localJSON("/api/cpic/passport-impact", { cpic_provenance: passportProvenance, genes: Object.fromEntries(Object.keys(passport).map(g => [g, {}])) });
+  passportReview = report;
+  if (report.status === "same_snapshot") {
+    $("passportImpact").textContent = "Your passport uses the active guideline snapshot. Genetic completeness is checked separately.";
+  } else if (report.status === "untracked") {
+    $("passportImpact").textContent = "This passport has no available source history. Reanalysis is needed to establish its version.";
+  } else {
+    $("passportImpact").textContent = `Guideline data changed since this passport was created. ${report.genome_reanalysis_required ? "Some genes may need the original genome analyzed again. " : ""}${report.gene_result_review_required ? "Some gene results need review. " : ""}${report.drug_recheck_required ? "Run medicine checks again. " : ""}${report.new_genes?.length ? "New guideline genes are missing from this passport: " + report.new_genes.join(", ") + "." : ""}`;
+  }
+  // Keep original values for audit; invalidate affected verified results in this session.
+  const affected = report.status === "untracked" ? Object.keys(passport) : (report.passport_affected_genes || []);
+  if (report.status === "untracked" || report.genome_reanalysis_required || report.gene_result_review_required) {
+    for (const gene of affected) if (passport[gene]?.status === "ok") {
+      passport[gene] = { ...passport[gene], previous_status: "ok", status: "unknown", note: "Source data changed or version history is missing; this gene result needs review before drug checks." };
+    }
+  }
+  return report;
+}
+async function withResources(action) {
+  if (resourceBusy) throw new Error("Another analysis is running. Please wait for it to finish.");
+  resourceBusy = true;
+  $("resourceCheck").disabled = true;
+  $("resourceActivate").disabled = true;
+  try { await prepareResources(); return await action(); }
+  finally { resourceBusy = false; $("resourceCheck").disabled = false; if (resourceStatus) renderResources(resourceStatus); }
+}
+$("resourceCheck").addEventListener("click", async () => {
+  if (resourceBusy) return;
+  resourceBusy = true; $("resourceCheck").disabled = true; $("resourceActivate").disabled = true;
+  $("resourceStatus").textContent = "Checking the live CPIC data and published release...";
+  setNav("busy", "Checking CPIC data…");
+  try { renderResources(await localJSON("/api/cpic/check", {})); }
+  catch (error) { $("resourceStatus").textContent = error.message; }
+  finally { resourceBusy = false; $("resourceCheck").disabled = false; if (resourceStatus) renderResources(resourceStatus); }
+});
+$("resourceActivate").addEventListener("click", async () => {
+  if (resourceBusy || !resourceStatus?.candidate) return;
+  resourceBusy = true; $("resourceActivate").disabled = true;
+  try {
+    const status = await localJSON("/api/cpic/activate", { snapshot_id: resourceStatus.candidate.snapshot_id });
+    renderResources(status); cpicContext = status.active;
+    if (Object.keys(passport).length) { await reviewPassportVersion(); renderPassport(); }
+  } catch (error) { $("resourceStatus").textContent = error.message; }
+  finally { resourceBusy = false; if (resourceStatus) renderResources(resourceStatus); }
+});
+
+// ================= PASSPORT MODEL =================
+// passport[gene] = { diplotype, result, lookup, source: "lab"|"consumer", status: "ok"|"unknown", note }
+let passport = {};
+let shareLink = null;  // set once the passport is shared (or opened from a shared link)
+function drawQR() {
+  $("qr").innerHTML = "";
+  try { new QRCode($("qr"), { text: shareLink || $("pid").textContent, width: 164, height: 164, colorDark: "#0A142D" }); } catch (e) { /* QR opsiyonel */ }
+}
+const SOURCE = { lab: "clinical lab report", genome: "genome file, needs confirmation", consumer: "consumer test, needs confirmation" };
+
+// Look up a diplotype in CPIC's phenotype table. Allele order differs between genes (*1/*2 but c.../Reference), so try both orders.
+async function lookupDiplotype(gene, dip) {
+  // Normalize lab notation: "*2x ≥ 3 / *29" -> "*2x≥3/*29"; DPYD "*1" is CPIC "Reference" (HLA "*57:01 negative" keeps its space)
+  if (!/negative|positive/i.test(dip)) dip = dip.replace(/\s+/g, "");
+  if (gene === "DPYD") dip = dip.split("/").map(a => a === "*1" ? "Reference" : a).join("/");
+  const parts = dip.split("/");
+  const tries = [dip]; if (parts.length === 2) tries.push(`${parts[1]}/${parts[0]}`);
+  for (const d of tries) {
+    const r = await get("diplotype", { genesymbol: `eq.${gene}`, diplotype: `eq.${d}`, select: "diplotype,generesult,lookupkey" });
+    if (r[0]) return { diplotype: r[0].diplotype, result: r[0].generesult, lookup: r[0].lookupkey[gene] };
+  }
+  return null;
+}
+
+// Which medicines each gene affects, in everyday words
+const GENE_WHAT = {
+  CYP2C19: "some heart medicines (blood thinners) and stomach medicines",
+  CYP2D6: "some painkillers and antidepressants",
+  DPYD: "some chemotherapy drugs",
+  CYP2C9: "some painkillers and blood thinners",
+  TPMT: "some immune-system and leukemia drugs",
+  NUDT15: "some immune-system and leukemia drugs",
+  SLCO1B1: "cholesterol drugs (statins)",
+  "HLA-B": "serious allergic reactions to some drugs",
+};
+const SPEED = {
+  "Poor Metabolizer": ["very slowly or not at all", true],
+  "Intermediate Metabolizer": ["more slowly than usual", true],
+  "Likely Intermediate Metabolizer": ["probably more slowly than usual", true],
+  "Normal Metabolizer": ["normally", false],
+  "Rapid Metabolizer": ["faster than usual", true],
+  "Ultrarapid Metabolizer": ["very fast", true],
+};
+const cap = s => s.replace(/^./, c => c.toUpperCase());
+const REASON = {
+  read: ["Couldn't be read", "A key position for this gene is missing from the file."],
+  test: ["Needs a special test", ""],
+  file: ["Not in this file", ""],
+  panel: ["Not analyzed yet", "Gene Passport doesn't read this gene from genome files yet; it's next on our list."],
+};
+let geneDrugs = {};  // gene -> CPIC guideline medicines (from the genome analysis)
+const OFF_AUTOSOME = { G6PD: "X", OTC: "X", HPRT1: "X", "MT-RNR1": "M" };
+const NEEDS_TEST = { CYP2D6: "Needs a copy-number test: parts of this gene can be deleted or duplicated, which a standard genome file can't show.",
+  "HLA-A": "Needs HLA typing: this gene varies too much to read from a standard genome file.",
+  "HLA-B": "Needs HLA typing: this gene varies too much to read from a standard genome file." };
+function plainGene(gene, p) {
+  if (p.status !== "ok") {
+    const drugs = geneDrugs[gene];
+    const what = drugs?.length ? `Matters for ${drugs.slice(0, 4).join(", ")}${drugs.length > 4 ? ` and ${drugs.length - 4} more` : ""}` : `Matters for ${GENE_WHAT[gene] || "some medicines"}`;
+    return [what, "unk"];
+  }
+  const result = p.result;
+  if (gene === "SLCO1B1") {
+    const m = { "Normal Function": "normal", "Decreased Function": "reduced", "Possible Decreased Function": "possibly reduced", "Poor Function": "strongly reduced", "Increased Function": "increased" };
+    return [`Liver uptake of cholesterol drugs (statins): ${m[result] || result}`, result === "Normal Function" ? "" : "flag"];
+  }
+  if (gene === "HLA-B") return result.includes("negative")
+    ? [`No known risk of a serious allergy to an HIV drug (abacavir) (${result.replace(" negative", "")} negative)`, ""]
+    : ["At risk of a serious allergy to some drugs", "flag"];
+  const [s, flag] = SPEED[result] || [result, true];
+  return [`Processes ${GENE_WHAT[gene] || "some medicines"} ${s}`, flag ? "flag" : ""];
+}
+
+function renderPassport() {
+  const CORE = ["CYP2C19", "CYP2C9", "SLCO1B1", "DPYD", "TPMT", "NUDT15", "CYP2D6", "HLA-B"];
+  const all = [...CORE.filter(g => passport[g]), ...Object.keys(passport).filter(g => !CORE.includes(g)).sort()];
+  const main = all.filter(g => CORE.includes(g) || passport[g].status === "ok"), more = all.filter(g => !main.includes(g));
+  const STATE = { flag: ["flag", "Attention"], unk: ["unk", "Unknown"], "": ["ok", "Typical"] };
+  const tally = { ok: 0, flag: 0, unk: 0 };
+  const row = g => {
+    const p = passport[g];
+    const [text, cls] = plainGene(g, p);
+    let [state, label] = STATE[cls] || STATE[""];
+    if (cls === "unk") label = (REASON[p.reason] || REASON.read)[0];
+    tally[state]++;
+    return `<details class="gene"><summary><span class="g-sym">${esc(g)}</span><span class="g-dip">${esc(p.diplotype || "")}</span><span class="state ${state}">${esc(label)}</span><span class="chev"></span></summary>
+      <div class="g-body"><p>${esc(text)}</p>${p.note ? `<p class="muted">${esc(p.note)}</p>` : ""}<p class="src">${esc(cap(SOURCE[p.source] || ""))}</p></div></details>`;
+  };
+  $("genes").innerHTML = main.map(row).join("");
+  $("genesMore").innerHTML = more.map(row).join("");
+  $("moreGenes").classList.toggle("hidden", !more.length);
+  const why = r => more.filter(g => (passport[g].reason || "read") === r).length;
+  $("moreSummary").textContent = `${more.length} more guideline genes · ` + [["panel", "not analyzed yet"], ["file", "not in this file"], ["test", "need a special test"], ["read", "couldn't be read"]]
+    .filter(([r]) => why(r)).map(([r, l]) => `${why(r)} ${l}`).join(" · ");
+  const identified = all.filter(g => passport[g].status === "ok").length;
+  $("geneSummary").innerHTML = `<span class="state ok">${identified} identified</span>${tally.flag ? `<span class="state flag">${tally.flag} need attention</span>` : ""}`;
+  $("geneCount").textContent = `${identified} of ${all.length}`;
+  $("issued").textContent = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+  $("passportVersion").textContent = passportProvenance ? `Created using saved CPIC data from ${new Date(passportProvenance.retrieved_at).toLocaleString()}. Source ID: ${passportProvenance.snapshot_id.slice(0, 12)}.` : "Source version was not recorded for this passport.";
+  drawQR();
+  $("out").innerHTML = RX_EMPTY;
+}
+const RX_EMPTY = `<div class="rx-empty">Type a medicine above, or tap one of the examples. Each medicine gets a colour from the CPIC guideline for your genes.</div>`;
+
+function callGene(gene, def, geno) {
+  // Count alternate bases at each core SNP; if a position is missing or unreadable the gene is unknown
+  const alt = {};
+  for (const core of Object.values(def.alleles)) Object.assign(alt, core);
+  const counts = {}, used = [];
+  for (const [rsid, ref] of Object.entries(def.rsids)) {
+    const g = geno[rsid];
+    if (!g || g.length !== 2 || /[-0DI]/.test(g)) return { unknown: `A key position was not read in the file (${rsid}).` };
+    // Strand check: accept only the reference and the expected alternate base; any other letter means another strand or allele, so don't trust it
+    if ([...g].some(b => b !== ref && b !== alt[rsid])) return { unknown: `${rsid} has unexpected bases (${g}); possibly a strand or allele difference.` };
+    counts[rsid] = [...g].filter(b => b === alt[rsid]).length;
+    used.push(`${rsid}=${g}`);
+  }
+  // "Consume" alleles in order: multi-SNP alleles first (e.g. TPMT *3A = the *3B + *3C positions)
+  const found = [];
+  for (const [name, core] of Object.entries(def.alleles)) {
+    const ids = Object.keys(core);
+    const k = Math.min(...ids.map(id => counts[id]));
+    for (let i = 0; i < k; i++) found.push(name);
+    ids.forEach(id => counts[id] -= k);
+  }
+  if (Object.values(counts).some(c => c > 0) || found.length > 2) return { unknown: "The variants don't fit a known combination.", used };
+  while (found.length < 2) found.unshift(def.reference);
+  return { diplotype: found.join("/"), used, phaseNote: found.filter(a => a !== def.reference).length > 1 };
+}
+
+// ================= MEDICINE CHECK =================
+// Common brand names (Turkey + US/EU) for instant lookup; unknown names go to the AI
+const BRANDS = {
+  // US / EU brands
+  brilinta: ["ticagrelor"], effient: ["prasugrel"], pravachol: ["pravastatin"], prilosec: ["omeprazole"],
+  protonix: ["pantoprazole"], prevacid: ["lansoprazole"], celexa: ["citalopram"], lexapro: ["escitalopram"],
+  paxil: ["paroxetine"], effexor: ["venlafaxine"], elavil: ["amitriptyline"], ultram: ["tramadol"],
+  jantoven: ["warfarin"], purinethol: ["mercaptopurine"], dilantin: ["phenytoin"], celebrex: ["celecoxib"],
+  advil: ["ibuprofen"], motrin: ["ibuprofen"], prograf: ["tacrolimus"], strattera: ["atomoxetine"],
+  risperdal: ["risperidone"], abilify: ["aripiprazole"], vfend: ["voriconazole"], tylenol: ["acetaminophen"],
+  // Turkey brands
+  plavix: ["clopidogrel"], karum: ["clopidogrel"], pingel: ["clopidogrel"],
+  coraspin: ["aspirin"], ecopirin: ["aspirin"], aspirin: ["aspirin"],
+  lipitor: ["atorvastatin"], ator: ["atorvastatin"], zocor: ["simvastatin"], crestor: ["rosuvastatin"],
+  xeloda: ["capecitabine"], kodein: ["codeine"], codeine: ["codeine"], contramal: ["tramadol"],
+  coumadin: ["warfarin"], imuran: ["azathioprine"], tegretol: ["carbamazepine"], ziagen: ["abacavir"],
+  nexium: ["esomeprazole"], lansor: ["lansoprazole"], losec: ["omeprazole"], cipralex: ["escitalopram"],
+  lustral: ["sertraline"], zoloft: ["sertraline"], zofran: ["ondansetron"], nolvadex: ["tamoxifen"], arveles: ["dexketoprofen"],
+  parol: ["acetaminophen"], majezik: ["flurbiprofen"], apranax: ["naproxen"], dikloron: ["diclofenac"],
+};
+const cleanName = s => s.trim().replace(/\d+([.,]\d+)?\s*(mg|mcg|µg|g|ml)\b/gi, "").trim();
+
+async function llm(prompt) {
+  let r = await fetch("/api/llm", { method: "POST", body: JSON.stringify({ prompt }) });
+  // The AI backend sometimes fails transiently ("model at capacity"); retry once
+  if (r.status >= 500) r = await fetch("/api/llm", { method: "POST", body: JSON.stringify({ prompt }) });
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.error || `LLM ${r.status}`);
+  const m = d.text.match(/\{[\s\S]*\}/);
+  if (!m) throw new Error("Yapay zekâ beklenen formatta cevap vermedi");
+  return { json: JSON.parse(m[0]), ms: d.ms, backend: d.backend };
+}
+
+// Every active ingredient CPIC knows (any evidence level), so generic names never need the AI
+let cpicDrugs = null;
+const cpicDrugNames = () => cpicDrugs ||= get("pair_view", { select: "drugname" })
+  .then(rows => new Set(rows.map(r => String(r.drugname).toLowerCase())))
+  .catch(error => { cpicDrugs = null; throw error; });
+
+async function resolveNames(items) {
+  const map = {}, unknown = [];
+  const generics = await cpicDrugNames().catch(() => new Set());
+  for (const it of items) {
+    const plain = it.toLowerCase().replace(/\(.*?\)/g, " ").replace(/\s+/g, " ").trim();
+    // Locale-specific lower-casing can turn a capital I into a dotless i, so try the plain form first
+    const key = [plain.split(" ")[0], it.toLocaleLowerCase("tr").split(/\s+/)[0]].find(k => BRANDS[k]) || plain.split(" ")[0];
+    const codeine = /kodein|codeine|#\s*[234]\b/i.test(it);  // e.g. "Tylenol #3" = acetaminophen + codeine
+    if (BRANDS[key]) map[it] = codeine && !BRANDS[key].includes("codeine") ? [...BRANDS[key], "codeine"] : BRANDS[key];
+    else if (generics.has(plain)) map[it] = [plain];
+    else if (generics.has(plain.split(" ")[0])) map[it] = [plain.split(" ")[0]];
+    else if (codeine) map[it] = ["codeine"];
+    else unknown.push(it);
+  }
+  let info = "";
+  if (unknown.length) {
+    const prompt = `The following are medicine names as a patient typed them: brand or generic names from any country. For each, give the English generic name(s) of the active ingredient(s) in lowercase (e.g. "Plavix" -> ["clopidogrel"]). If you are not sure, return null; do not guess.
+Return only JSON: {"<input exactly>": ["generic", ...] | null}
+Inputs: ${JSON.stringify(unknown)}`;
+    try {
+      const { json, ms, backend } = await llm(prompt);
+      unknown.forEach(u => map[u] = json[u] || null);
+      info = `${unknown.length} drug name(s) resolved by AI (${backend}, ${(ms / 1000).toFixed(1)} s)`;
+    } catch (e) {
+      unknown.forEach(u => map[u] = null);
+      info = `Some drug names could not be resolved: ${e.message}`;
+    }
+  }
+  return { map, info };
+}
+
+// The verdict comes from CPIC, never from the AI
+function colorOf(rec, phenotypeNormal) {
+  const t = rec.drugrecommendation || "";
+  // CPIC "No recommendation" for one patient group is neutral; it must not outrank another group's advice
+  if (/^\s*no recommendation\b/i.test(t)) return "gray";
+  // Red = CPIC says "avoid / do not use". "Lower the dose or pick an alternative" is yellow.
+  if (/\bavoid\b|contraindicat|not recommended|do not use/i.test(t)) return "red";
+  if (phenotypeNormal || /label-recommended|standard dos|no indication to change|desired starting dose|per standard/i.test(t)) return "green";
+  return "yellow";
+}
+const RANK = { red: 3, yellow: 2, green: 1, gray: 0 };
+
+async function checkDrug(input, generic) {
+  const pairs = await get("pair_view", { drugname: `eq.${generic}`, cpiclevel: "in.(A,B,A/B)", select: "genesymbol,cpiclevel,guidelinename,guidelineurl" });
+  if (!pairs.length) return { input, generic, color: "gray" };
+  const genes = [...new Set(pairs.map(p => p.genesymbol))];
+  // Only verified genes are used; an unknown gene counts as missing (never assumed normal)
+  const have = genes.filter(g => passport[g]?.status === "ok" && passport[g].lookup);
+  const missing = genes.filter(g => !have.includes(g));
+  const guideline = pairs.find(p => p.guidelineurl) || pairs[0];
+  if (!have.length) return { input, generic, color: "yellow", genes, missing, guideline };
+  const key = Object.fromEntries(have.map(g => [g, passport[g].lookup]));
+  const recs = await get("recommendation_view", { drugname: `eq.${generic}`, lookupkey: `cs.${JSON.stringify(key)}`,
+    select: "population,phenotypes,implications,drugrecommendation,classification,comments" });
+  if (!recs.length) return { input, generic, color: "yellow", genes, missing, guideline };
+  const normal = have.every(g => /^Normal/.test(passport[g].result) || /negative/.test(passport[g].result));
+  // If there are several patient groups (e.g. after a heart attack / other), show the one needing the most attention
+  const scored = recs.map(r => ({ r, c: colorOf(r, normal) })).sort((a, b) => RANK[b.c] - RANK[a.c]);
+  let color = scored[0].c;
+  if (color === "green" && missing.length) color = "yellow";
+  return { input, generic, color, genes, missing, guideline, rec: scored[0].r, nPop: recs.length };
+}
+
+const TITLE = {
+  red: "Caution: this drug may not suit you",
+  yellow: "A dose change or genetic test may be needed",
+  green: "Looks compatible with your genes",
+  gray: "No known gene effect",
+};
+const VERDICT = { red: ["octagon", "Caution"], yellow: ["triangle", "Review"], green: ["check", "Compatible"], gray: ["minus", "No guideline"] };
+
+function fallbackWhy(r) {
+  if (r.color === "gray") return "Scientific guidelines don't recommend any gene-based change for this drug.";
+  if (!r.rec) return r.missing.length
+    ? `The ${r.missing.join(", ")} ${r.missing.length > 1 ? "genes matter" : "gene matters"} for this drug, but your passport doesn't have this result or it couldn't be read reliably. Your doctor may order a genetic test.`
+    : `The ${r.genes.join(", ")} gene matters for this drug; your doctor should do the dose calculation in the guideline.`;
+  if (r.color === "green") return `The ${r.genes.join(", ")} gene matters for this drug; your result is normal, so standard use is recommended.`;
+  if (r.color === "yellow" && r.missing.length && /^Normal/.test(Object.values(r.rec.phenotypes || {})[0] || "")) return `Your known genes are normal, but ${r.missing.join(", ")} information is missing.`;
+  return `The ${r.genes.join(", ")} gene matters for this drug and your result is different from normal.`;
+}
+
+function card(r, i) {
+  const infoMissing = r.color === "yellow" && !r.rec && r.missing?.length;
+  const title = r.unknown ? "Medicine name not recognized" : infoMissing ? "Genetic information missing" : TITLE[r.color];
+  const [ic, label] = VERDICT[r.color];
+  const badge = r.unknown ? "Not recognized" : infoMissing ? "Info missing" : label;
+  const tech = r.rec ? `<details class="tech"><summary>CPIC guideline text</summary>
+      <p><b>Implication:</b> ${esc(Object.values(r.rec.implications || {}).join(" "))}</p>
+      <p><b>Recommendation (${esc(r.rec.classification)}):</b> ${esc(r.rec.drugrecommendation)}</p>
+      ${r.nPop > 1 ? `<p>Note: this drug has ${r.nPop} recommendations for different patient groups; the one needing the most attention is shown. ${r.rec.population ? "Group: " + esc(r.rec.population) : ""}</p>` : ""}
+      ${r.guideline?.guidelineurl ? `<p>Guideline: <a href="${r.guideline.guidelineurl}" target="_blank">${esc(r.guideline.guidelinename || "CPIC")}</a></p>` : ""}</details>` : "";
+  const genes = (r.genes || []).map(g => r.missing?.includes(g)
+    ? `<span class="gtag miss" title="Not available in your passport">${esc(g)} · missing</span>`
+    : `<span class="gtag" title="From your passport">${esc(g)}</span>`).join("");
+  const generic = r.generic && r.generic.toLowerCase() !== String(r.input).toLowerCase() ? `${esc(r.generic)} · ` : "";
+  return `<details class="drug ${r.color}"><summary><span class="d-ic">${icon(r.unknown ? "help" : ic)}</span>
+    <span class="d-main"><span class="d-name">${esc(r.input)}</span><span class="d-line">${generic}<b>${title}</b></span></span>
+    <span class="verdict">${badge}</span><span class="chev"></span></summary>
+    <div class="d-body">
+    <p id="why${i}">${esc(fallbackWhy(r))}${r.rec && (r.color === "red" || r.color === "yellow") ? ' <span class="wait">preparing a plain-language explanation…</span>' : ""}</p>
+    ${r.color === "red" || r.color === "yellow" ? `<div class="ask">${icon("chat")}<div><b>Ask your doctor</b><span id="ask${i}">Is this drug right for my genes? Do I need a different dose or an alternative?</span></div></div>
+    <p class="d-safe">Don't stop or change your medicine on your own; talk to your doctor.</p>` : ""}
+    ${genes ? `<div class="d-meta">Genes involved ${genes}</div>` : ""}
+    ${tech}</div></details>`;
+}
+
+async function explainAll(results) {
+  const items = results.map((r, i) => ({ r, i })).filter(({ r }) => r.rec && (r.color === "red" || r.color === "yellow"));
+  if (!items.length) return "";
+  const payload = items.map(({ r, i }) => ({ id: i, drug: r.generic, gene: Object.keys(r.rec.phenotypes || {}).join(","),
+    result: Object.values(r.rec.phenotypes || {}).join(","), implication: Object.values(r.rec.implications || {}).join(" "), recommendation: r.rec.drugrecommendation }));
+  const prompt = `You are a medical translator. Rewrite the following CPIC pharmacogenomic guideline texts in plain English that a patient with no biology background understands.
+Rules: Use only the information in the given text; add nothing new. No jargon (no words like metabolizer, phenotype, active metabolite). Do NOT tell the patient to stop or change the medicine; that is the doctor's decision.
+For each item:
+- "why": one sentence on why this drug may work differently in this person
+- "ask": one short question to ask the doctor
+Return only JSON: {"<id>": {"why": "...", "ask": "..."}}
+Data: ${JSON.stringify(payload)}`;
+  try {
+    const { json, ms, backend } = await llm(prompt);
+    items.forEach(({ i }) => {
+      const t = json[i] || json[String(i)];
+      if (t?.why) $(`why${i}`).textContent = t.why;
+      if (t?.ask && $(`ask${i}`)) $(`ask${i}`).textContent = t.ask;
+    });
+    return `plain-language explanations: ${backend}, ${(ms / 1000).toFixed(1)} s`;
+  } catch (e) {
+    items.forEach(({ i }) => document.querySelector(`#why${i} .wait`)?.remove());
+    return `Plain-language explanation unavailable (${e.message}); showing the guideline summary.`;
+  }
+}
+
+$("check").addEventListener("click", () => withResources(async () => {
+  const out = $("out");
+  const t0 = performance.now();
+  const items = $("drugs").value.split(/[,\n;]+/).map(cleanName).filter(Boolean);
+  out.innerHTML = `<p class="wait">Resolving drug names...</p>`;
+  try {
+    await reviewPassportVersion();
+    renderPassport();
+    const { map, info } = await resolveNames(items);
+    const t1 = performance.now();
+    out.innerHTML = `<p class="wait">Checking CPIC guidelines...</p>`;
+    const jobs = [];
+    for (const it of items) {
+      if (!map[it]) { jobs.push(Promise.resolve({ input: it, generic: null, color: "gray", unknown: true })); continue; }
+      for (const g of map[it]) jobs.push(checkDrug(it, g));
+    }
+    const results = await Promise.all(jobs);
+    const t2 = performance.now();
+    // Combination products (e.g. Tylenol #3) give several cards; the counter uses the number of medicines typed
+    const matters = new Set(results.filter(r => r.color !== "gray").map(r => r.input)).size;
+    const tally = { red: 0, yellow: 0, green: 0, gray: 0 };
+    results.forEach(r => tally[r.color]++);
+    const LABEL = { red: "caution", yellow: "review", green: "compatible", gray: "no gene guideline" };
+    const shown = Object.keys(tally).filter(c => tally[c]);
+    out.innerHTML = `<div class="summary"><h3>Your genes matter for <b>${matters}</b> of your <b>${items.length}</b> medicines.</h3>
+        <div class="bar">${shown.map(c => `<span class="${c}" style="flex:${tally[c]}"></span>`).join("")}</div>
+        <div class="tally">${shown.map(c => `<span><i class="${c}"></i>${tally[c]} ${LABEL[c]}</span>`).join("")}</div></div>`
+      + `<div class="results">${results.map(card).join("")}</div>`
+      + `<p class="muted" id="timing">${info ? info + " · " : ""}CPIC check ${((t2 - t1) / 1000).toFixed(1)} s</p>`;
+    results.forEach((r, i) => { if (r.unknown) $(`why${i}`).textContent = "This drug name wasn't recognized; try typing the active ingredient."; });
+    const first = results.findIndex(r => r.color === "red") >= 0 ? results.findIndex(r => r.color === "red") : results.findIndex(r => r.color !== "gray");
+    const cards = out.querySelectorAll("details.drug");
+    if (cards.length === 1) cards[0].open = true; else if (first >= 0) cards[first].open = true;
+    const exp = await explainAll(results);
+    if (exp) $("timing").textContent += ` · ${exp} · total ${((performance.now() - t0) / 1000).toFixed(1)} s`;
+  } catch (e) {
+    out.innerHTML = `<p class="err">Error: ${esc(e.message)}</p>`;
+  }
+}).catch(error => $("out").innerHTML = `<p class="err">${esc(error.message)}</p>`));
+
+// ================= ONE PATH: genome file → passport =================
+let genomeDocument = null;
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+const mb = bytes => bytes >= 1048576 ? `${(bytes / 1048576).toFixed(0)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+function view(name) {
+  ["importView", "procView", "passportView"].forEach(id => $(id).classList.toggle("hidden", id !== name));
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+function step(id, state, text) {
+  const li = $(`st-${id}`);
+  li.className = state;
+  if (text !== undefined) li.querySelector("small").textContent = text;
+}
+const progress = share => $("procBar").style.width = `${Math.round(share * 100)}%`;
+const fail = error => { view("importView"); $("importOut").innerHTML = `<p class="err">${esc(error.message)}</p>`; };
+
+// Build the passport from the server's genome evidence. Same rule as before: a gene is called only when
+// every key position has evidence (an observed genotype, or reference inside the confident-region file);
+// status is always re-derived from the evidence, never taken from status fields inside a file.
+async function showGenome(data, onGene = () => {}) {
+  if (data.schema !== "gene-passport-genome-v1" || data.assembly !== "GRCh38" || !data.genes || !Array.isArray(data.evidence)) throw new Error("Unsupported genome passport");
+  passport = {};
+  passportProvenance = data.cpic_provenance || null;
+  passportReview = null;
+  geneDrugs = {};
+  for (const pair of data.cpic_pairs || []) (geneDrugs[pair.genesymbol] ||= []).includes(pair.drugname) || geneDrugs[pair.genesymbol].push(pair.drugname);
+  const inFile = new Set((data.chromosomes || []).map(c => String(c).replace(/^chr/i, "").toUpperCase().replace(/^MT$/, "M")));
+  for (const [gene, entry] of Object.entries(data.genes)) {
+    const chrom = String(entry.chromosome || OFF_AUTOSOME[gene] || "").replace(/^chr/i, "").toUpperCase().replace(/^MT$/, "M");
+    const reason = NEEDS_TEST[gene] ? "test" : chrom && inFile.size && !inFile.has(chrom) ? "file" : "panel";
+    const note = reason === "test" ? NEEDS_TEST[gene]
+      : reason === "file" ? `This gene is on ${chrom === "M" ? "mitochondrial DNA" : "chromosome " + chrom}, which this genome file doesn't include.`
+      : REASON.panel[1];
+    passport[gene] = { status: "unknown", source: "genome", diplotype: "", reason, note };
+  }
+  genomeDocument = data;
+  clearShare();
+  if (passportProvenance?.snapshot_id && !legacyCPIC) {
+    try { cpicContext = await localJSON("/api/cpic/manifest?snapshot=" + encodeURIComponent(passportProvenance.snapshot_id)); }
+    catch (error) { /* fall back to the active snapshot */ }
+  }
+  const mapResponse = await fetch("allele_map.json");
+  if (!mapResponse.ok) throw new Error("Could not load allele definitions");
+  const map = await mapResponse.json();
+  const geno = {};
+  for (const site of data.evidence) {
+    if (!["observed", "reference_in_benchmark"].includes(site.status) || !/^[ACGT]{2}$/.test(site.genotype || "")) continue;
+    for (const rsid of site.rsids || []) geno[rsid] = site.genotype;
+  }
+  const rows = [];
+  for (const [gene, entry] of Object.entries(passport)) {
+    let read = "-", status = "not called: needs analysis beyond single positions";
+    if (map.genes[gene]) {
+      const call = callGene(gene, map.genes[gene], geno);
+      if (call.diplotype) {
+        read = call.diplotype;
+        const hit = await lookupDiplotype(gene, call.diplotype);
+        if (hit) {
+          passport[gene] = { ...hit, source: "genome", status: "ok", note: call.phaseNote ? "Phase unknown." : "" };
+          status = `CPIC: ${hit.result}${call.phaseNote ? " (phase unknown)" : ""}`;
+        } else status = "no match in CPIC";
+      } else if (passport[gene].reason === "panel") {
+        status = `unknown: ${call.unknown}`;
+        passport[gene] = { ...passport[gene], reason: "read", note: call.unknown };
+      }
+      await onGene(gene, passport[gene]);
+    }
+    rows.push({ gene, read, ok: passport[gene].status === "ok", status, from: data.genes[gene]?.note || "" });
+  }
+  $("identityBadge").textContent = "genome file · not clinically validated";
+  $("passportName").textContent = String(data.sample || "Imported genome");
+  $("pid").textContent = "GP-" + String(data.source_sha256 || "imported").slice(0, 12);
+  $("passportNote").classList.add("hidden");
+  $("genomeDetails").classList.remove("hidden");
+  $("genomeDetails").innerHTML = `<summary>How this passport was made</summary>
+    <p>${Number(data.records_scanned).toLocaleString("en")} variants read with fixed rules (no AI). ${data.bed_sha256 ? "A confident-region file was used: positions inside it without a variant count as matching the reference." : "No confident-region file was given, so positions where you match the reference stay unknown."} ${data.evidence.filter(s => s.genotype).length} of ${data.evidence.length} CPIC positions have evidence. Genome results should be confirmed by a clinical test.</p>
+    <div class="table-wrap"><table><tr><th>Gene</th><th>Read</th><th>Status</th><th>Coverage</th></tr>${rows.map(r => `<tr><td>${esc(r.gene)}</td><td>${esc(r.read)}</td><td><span class="state ${r.ok ? "ok" : "unk"}">${r.ok ? "called" : "unknown"}</span> ${esc(r.status)}</td><td>${esc(r.from)}</td></tr>`).join("")}</table></div>
+    <p>${esc(data.limitations)}</p><p>CPIC catalog ${esc(data.catalog_sha256)} · analyzed ${esc(data.created_at)}</p>`;
+  if (resourceStatus?.active) await reviewPassportVersion();
+  renderPassport();
+  return rows.filter(r => r.ok).length;
+}
+
+// All dropped files go up in one request; X-File-Sizes tells the server where each ends.
+// The server sorts them by content (VCF, confident-region BED, or a zip holding both).
+const TOO_LARGE = "This upload is over 100 MB, the limit of this public demo link. Try NA12877, NA12879 or NA12881 (39-53 MB), or run Gene Passport locally for larger files.";
+function uploadGenome(files, onProgress) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api/genome");
+    xhr.setRequestHeader("X-File-Sizes", files.map(f => f.size).join(","));
+    xhr.upload.onprogress = e => e.lengthComputable && onProgress(e.loaded / e.total, false);
+    xhr.upload.onload = () => onProgress(1, true);
+    xhr.onload = () => {
+      let data = {};
+      try { data = JSON.parse(xhr.responseText); } catch { /* keep the status message */ }
+      if (xhr.status === 413) return reject(new Error(TOO_LARGE));
+      xhr.status < 300 ? resolve(data) : reject(new Error(data.error || `Genome import failed (${xhr.status})`));
+    };
+    xhr.onerror = () => reject(new Error("Upload failed: network error"));
+    xhr.send(new Blob(files));
+  });
+}
+
+async function startImport(list) {
+  const files = [...list].filter(f => /\.(vcf|bed|zip|gz|bgz)$/i.test(f.name) && !/\.(tbi|csi)$/i.test(f.name));
+  if (!files.length) return fail(new Error("Drop a genome file (.vcf or .vcf.gz), optionally with its .bed file."));
+  if (resourceBusy) return;
+  const total = files.reduce((n, f) => n + f.size, 0);
+  if (total > 100 * 1048576 && location.hostname.endsWith(".trycloudflare.com")) return fail(new Error(TOO_LARGE));
+  $("importOut").innerHTML = "";
+  $("procFiles").textContent = `${files.map(f => f.name).join(" + ")} · ${mb(total)}`;
+  $("ticker").innerHTML = "";
+  ["upload", "read", "match", "issue"].forEach(s => step(s, ""));
+  progress(.02);
+  view("procView");
+  let timer = null;
+  try {
+    await withResources(async () => {
+      step("upload", "active", `0% of ${mb(total)}`);
+      const data = await uploadGenome(files, (share, done) => {
+        progress(.04 + share * .36);
+        step("upload", done ? "done" : "active", done ? `${mb(total)} uploaded` : `${Math.round(share * 100)}% of ${mb(total)}`);
+        if (done && !timer) {
+          // The server now reads the whole file; ease the bar toward 80% while it works.
+          const start = performance.now();
+          step("read", "active", "Scanning millions of variants…");
+          timer = setInterval(() => {
+            const s = (performance.now() - start) / 1000;
+            progress(.4 + .4 * (1 - Math.exp(-s / 10)));
+            step("read", "active", `Scanning variants… ${s.toFixed(0)} s`);
+          }, 250);
+        }
+      });
+      clearInterval(timer);
+      step("upload", "done");
+      step("read", "done", `${Number(data.records_scanned).toLocaleString("en")} variants read${data.upload?.confident_regions ? " · confident regions used" : " · no confident-region file"}`);
+      step("match", "active", "Matching CPIC gene definitions…");
+      progress(.84);
+      const called = await showGenome(data, async (gene, entry) => {
+        $("ticker").insertAdjacentHTML("beforeend", `<span class="tick ${entry.status === "ok" ? "ok" : "unk"}">${esc(gene)} · ${esc(entry.status === "ok" ? entry.diplotype : "unknown")}</span>`);
+        await sleep(140);
+      });
+      step("match", "done", `${called} medicine genes identified`);
+      step("issue", "active");
+      progress(1);
+      await sleep(600);
+      step("issue", "done", "Passport ready");
+      await sleep(700);
+    });
+    view("passportView");
+    $("passportView").classList.remove("reveal");
+    void $("passportView").offsetWidth;  // restart the reveal animation
+    $("passportView").classList.add("reveal");
+  } catch (error) {
+    clearInterval(timer);
+    fail(error);
+  }
+}
+
+$("genomeFiles").addEventListener("change", e => { if (e.target.files.length) startImport(e.target.files); e.target.value = ""; });
+// Drag & drop, including whole folders
+async function droppedFiles(dataTransfer) {
+  const entries = [...dataTransfer.items].map(item => item.webkitGetAsEntry?.()).filter(Boolean);
+  if (!entries.length) return [...dataTransfer.files];
+  const out = [];
+  const walk = async entry => {
+    if (entry.isFile) out.push(await new Promise((resolve, reject) => entry.file(resolve, reject)));
+    else if (entry.isDirectory) {
+      const reader = entry.createReader();
+      for (let batch; (batch = await new Promise((resolve, reject) => reader.readEntries(resolve, reject))).length;) for (const e of batch) await walk(e);
+    }
+  };
+  for (const entry of entries) await walk(entry);
+  return out;
+}
+["dragenter", "dragover"].forEach(type => $("dropzone").addEventListener(type, e => { e.preventDefault(); $("dropzone").classList.add("drag"); }));
+["dragleave", "drop"].forEach(type => $("dropzone").addEventListener(type, () => $("dropzone").classList.remove("drag")));
+$("dropzone").addEventListener("drop", async e => { e.preventDefault(); startImport(await droppedFiles(e.dataTransfer)); });
+$("restart").addEventListener("click", () => { $("importOut").innerHTML = ""; view("importView"); });
+
+// Medicine search: Enter or a suggestion runs the check
+let suggestNames = null, suggestIndex = -1;
+async function suggestionList() {
+  if (!suggestNames) {
+    const generics = [...await cpicDrugNames().catch(() => new Set())];
+    suggestNames = [...Object.entries(BRANDS).map(([brand, gen]) => [cap(brand), gen.join(" + ")]), ...generics.map(g => [g, "active ingredient"])];
+  }
+  return suggestNames;
+}
+const hideSuggest = () => { $("suggest").classList.add("hidden"); suggestIndex = -1; };
+function pickSuggestion(name) {
+  const parts = $("drugs").value.split(",");
+  parts[parts.length - 1] = (parts.length > 1 ? " " : "") + name;
+  $("drugs").value = parts.join(",");
+  hideSuggest();
+  $("drugs").focus();
+}
+$("drugs").addEventListener("input", async () => {
+  const token = $("drugs").value.split(",").pop().trim().toLowerCase();
+  if (token.length < 2) return hideSuggest();
+  // Match the name or, for brands, the active ingredient ("clopi" also finds Plavix); name matches first
+  const score = ([n, hint]) => { const at = n.toLowerCase().indexOf(token); return at >= 0 ? at : 50 + hint.toLowerCase().indexOf(token); };
+  const list = (await suggestionList()).filter(([n, hint]) => n.toLowerCase().includes(token) || hint.toLowerCase().includes(token))
+    .sort((a, b) => score(a) - score(b) || a[0].length - b[0].length).slice(0, 7);
+  if (!list.length) return hideSuggest();
+  suggestIndex = -1;
+  $("suggest").innerHTML = list.map(([n, hint]) => {
+    const at = n.toLowerCase().indexOf(token);
+    const name = at < 0 ? esc(n) : `${esc(n.slice(0, at))}<mark>${esc(n.slice(at, at + token.length))}</mark>${esc(n.slice(at + token.length))}`;
+    return `<li role="option" data-name="${esc(n)}"><span>${name}</span><small>${esc(hint)}</small></li>`;
+  }).join("");
+  $("suggest").classList.remove("hidden");
+});
+$("suggest").addEventListener("mousedown", e => { const li = e.target.closest("li"); if (li) { e.preventDefault(); pickSuggestion(li.dataset.name); } });
+$("drugs").addEventListener("blur", () => setTimeout(hideSuggest, 120));
+$("drugs").addEventListener("keydown", e => {
+  const items = [...$("suggest").querySelectorAll("li")], open = !$("suggest").classList.contains("hidden");
+  if (open && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
+    e.preventDefault();
+    suggestIndex = (suggestIndex + (e.key === "ArrowDown" ? 1 : -1) + items.length) % items.length;
+    items.forEach((li, k) => li.classList.toggle("active", k === suggestIndex));
+  } else if (e.key === "Escape") hideSuggest();
+  else if (e.key === "Enter") {
+    if (open && suggestIndex >= 0) pickSuggestion(items[suggestIndex].dataset.name);
+    else { hideSuggest(); $("check").click(); }
+  }
+});
+document.querySelectorAll("[data-drug]").forEach(b => b.addEventListener("click", () => { $("drugs").value = b.dataset.drug; $("check").click(); }));
+
+// ================= PUBLIC TEST GENOMES (genomes/manifest.json) =================
+async function loadSamples() {
+  const manifest = await (await fetch("genomes/manifest.json")).json();
+  const demoLink = location.hostname.endsWith(".trycloudflare.com");
+  const size = p => p.files.reduce((n, f) => n + (f.bytes || 0), 0);
+  // Files under 100 MB first: they also work on the public demo link (Cloudflare's free upload limit)
+  const people = [...manifest.genomes].sort((a, b) => (size(a) > 100 * 1048576) - (size(b) > 100 * 1048576));
+  const link = (file, label) => `<a href="${esc(file.url || file.split_from)}" target="_blank" rel="noopener"${file.url ? "" : ' title="Family file; genomes/download.py splits this person out"'}>${icon("external")}${label}${file.url ? "" : " (family file)"}</a>`;
+  const short = v => v.replace("Reference/Reference", "Ref/Ref").replace(/ \((.*?)( Metabolizer| Function)?\)/, " · $1");
+  $("samples").innerHTML = people.map(p => {
+    const big = size(p) > 100 * 1048576;
+    const vcf = p.files.find(f => f.role === "vcf"), bed = p.files.find(f => f.role === "bed");
+    const tag = demoLink ? (big ? `<span class="s-tag">Local only</span>` : `<span class="s-tag ok">Works here</span>`) : "<span></span>";
+    return `<details class="sample" id="sample-${esc(p.id)}"><summary>
+      <span class="s-id">${esc(p.id)}</span><span class="s-label">${esc(p.label)}</span>${tag}
+      <a class="s-zip${demoLink && big ? " muted-zip" : ""}" href="${esc(p.zip_url)}" title="Genome VCF + confident-region BED">${icon("download")}.zip <code>${mb(size(p))}</code></a><span class="chev"></span></summary>
+      <div class="s-body">
+        <div class="s-links"><a href="${esc(p.project_url)}" target="_blank" rel="noopener">${icon("external")}${esc(p.project)}</a>${link(vcf, "Public VCF")}${link(bed, "Public BED")}</div>
+        ${p.expected ? `<div class="s-exp">${Object.entries(p.expected).map(([g, v]) => `<span class="${/Normal|unknown/.test(v) ? "" : "flag"}">${esc(g)} ${esc(short(v))}</span>`).join("")}</div>` : ""}
+        <div class="s-sha">${p.files.map(f => `${esc(f.name)} · sha256 ${esc(f.sha256 || "")}`).join("<br>")}</div>
+      </div></details>`;
+  }).join("");
+}
+$("randomPick").addEventListener("click", () => {
+  const rows = [...document.querySelectorAll("details.sample")];
+  if (!rows.length) return;
+  // On the public demo link, pick among the files that can be uploaded here
+  const pool = location.hostname.endsWith(".trycloudflare.com") ? rows.filter(r => r.querySelector(".s-tag.ok")) : rows;
+  rows.forEach(r => { r.classList.remove("picked"); r.open = false; });
+  const pick = pool[Math.floor(Math.random() * pool.length)];
+  void pick.offsetWidth;
+  pick.classList.add("picked");
+  pick.open = true;
+  pick.scrollIntoView({ behavior: "smooth", block: "center" });
+});
+
+$("passportSave").addEventListener("click", () => {
+  const data = genomeDocument ? { ...genomeDocument, version_review: passportReview } : {
+    schema: "gene-passport-v1", created_at: new Date().toISOString(), genes: passport,
+    cpic_provenance: passportProvenance, version_review: passportReview,
+    limitations: "Source freshness and genetic completeness are separate. This prototype is not a clinical diagnosis." };
+  const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
+  const link = document.createElement("a"); link.href = url; link.download = "gene-passport.json"; link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+const statusFail = error => { $("resourceStatus").textContent = error.message; setNav("warn", "CPIC status unavailable"); };
+// ================= SHAREABLE PASSPORT =================
+// Stored on this server (SQLite) under an unguessable ID; no accounts. Results are re-verified against CPIC on open.
+function clearShare() { shareLink = null; $("shareOut").classList.add("hidden"); $("shareErr").classList.add("hidden"); }
+function setShare(id) {
+  shareLink = `${location.origin}${location.pathname}?p=${encodeURIComponent(id)}`;
+  $("pid").textContent = "GP-" + id;
+  $("shareUrl").value = shareLink;
+  $("shareOut").classList.remove("hidden");
+  $("shareErr").classList.add("hidden");
+  drawQR();
+}
+$("passportShare").addEventListener("click", async () => {
+  const button = $("passportShare");
+  button.disabled = true;
+  try {
+    const response = await fetch("/api/passports", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({
+      genes: passport, identity: { name: $("passportName").textContent, badge: $("identityBadge").textContent }, cpic_provenance: passportProvenance }) });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || "Sharing is not available on this server.");
+    setShare(data.id);
+  } catch (error) {
+    $("shareErr").textContent = error.message;
+    $("shareErr").classList.remove("hidden");
+  } finally { button.disabled = false; }
+});
+$("shareCopy").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText(shareLink); }
+  catch { $("shareUrl").select(); document.execCommand("copy"); }  // plain-http deploys have no clipboard API
+  $("shareCopy").lastChild.textContent = "Copied";
+  setTimeout(() => $("shareCopy").lastChild.textContent = "Copy", 1500);
+});
+async function openShared(id) {
+  const response = await fetch(`/api/passports/${encodeURIComponent(id)}`);
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || "Shared passport not found");
+  const unverified = "Could not be re-verified against the current guideline data.";
+  passport = {};
+  await Promise.all(Object.entries(data.genes || {}).map(async ([gene, e]) => {
+    let entry = { diplotype: e.diplotype || "", source: e.source, status: "unknown", note: e.note || "" };
+    if (e.status === "ok" && e.diplotype) {
+      const hit = await lookupDiplotype(gene, e.diplotype);
+      entry = hit ? { ...hit, source: e.source, status: "ok" } : { ...entry, note: unverified };
+    } else if (e.status === "ok" && e.result) {
+      const g = await get("gene_result", { genesymbol: `eq.${gene}`, result: `eq.${e.result}`, select: "result,activityscore" });
+      entry = g.length && !g.some(x => x.activityscore && x.activityscore !== "n/a")
+        ? { diplotype: "", result: e.result, lookup: e.result, source: e.source, status: "ok" } : { ...entry, note: unverified };
+    }
+    passport[gene] = entry;
+  }));
+  passportProvenance = data.cpic_provenance || null; passportReview = null;
+  genomeDocument = null;
+  $("passportName").textContent = data.identity?.name || "Shared passport";
+  $("identityBadge").textContent = data.identity?.badge || "shared passport";
+  $("passportNote").textContent = `Shared passport (shared ${new Date(data.shared_at).toLocaleString()}). Its results were re-checked against the guideline data just now.`;
+  $("passportNote").classList.remove("hidden");
+  $("genomeDetails").classList.add("hidden");
+  if (resourceStatus?.active) await reviewPassportVersion();
+  setShare(id);
+  renderPassport();
+  view("passportView");
+}
+
+if (typeof window !== "undefined") {
+  window.addEventListener("scroll", () => document.querySelector(".nav").classList.toggle("scrolled", window.scrollY > 8), { passive: true });
+  const sharedId = new URLSearchParams(location.search).get("p");
+  if (sharedId) withResources(() => openShared(sharedId)).catch(fail);
+  loadSamples().catch(() => $("samples").innerHTML = '<p class="muted">Test genome list unavailable.</p>');
+  refreshResources().catch(statusFail);
+  setInterval(() => { if (!resourceBusy) refreshResources().catch(statusFail); }, 60000);
+}
+</script>
+</body>
+</html>

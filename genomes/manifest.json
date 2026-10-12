@@ -1,0 +1,337 @@
+{
+  "about": "10 real, publicly released human reference genomes (GRCh38) for testing Gene Passport. Download a person's VCF and confident-region file from the public links, then drop both on the site. genomes/download.py fetches them all and checks the SHA-256 values below.",
+  "genomes": [
+    {
+      "id": "HG001",
+      "coriell": "NA12878",
+      "label": "CEPH family 1463 (Utah) \u00b7 mother",
+      "project": "NIST Genome in a Bottle, benchmark v4.2.1 (GRCh38)",
+      "project_url": "https://www.nist.gov/programs-projects/genome-bottle",
+      "files": [
+        {
+          "role": "vcf",
+          "name": "HG001_GRCh38_1_22_v4.2.1_benchmark.vcf.gz",
+          "url": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/NA12878_HG001/NISTv4.2.1/GRCh38/HG001_GRCh38_1_22_v4.2.1_benchmark.vcf.gz",
+          "bytes": 125932193,
+          "sha256": "93bc4c2c696eaf13515ab058caecc064bfed704f85bac7482330ca91bc730daa"
+        },
+        {
+          "role": "bed",
+          "name": "HG001_GRCh38_1_22_v4.2.1_benchmark.bed",
+          "url": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/NA12878_HG001/NISTv4.2.1/GRCh38/HG001_GRCh38_1_22_v4.2.1_benchmark.bed",
+          "bytes": 15479939,
+          "sha256": "dc3485e60447a3e863c34dfc063c3710ea5ed5efae50855c5197ba62538263b9"
+        }
+      ],
+      "expected": {
+        "CYP2C19": "*1/*2 (Intermediate Metabolizer)",
+        "CYP2C9": "*1/*2 (Intermediate Metabolizer)",
+        "SLCO1B1": "*1/*5 (Decreased Function)",
+        "NUDT15": "*1/*1 (Normal Metabolizer)",
+        "TPMT": "*1/*1 (Normal Metabolizer)",
+        "DPYD": "Reference/Reference (Normal Metabolizer)"
+      },
+      "variants": 3893341,
+      "zip_url": "https://github.com/surkanfuren/pharmageno/releases/download/test-genomes-v1/HG001.zip"
+    },
+    {
+      "id": "HG002",
+      "coriell": "NA24385",
+      "label": "Ashkenazi Jewish family \u00b7 son",
+      "project": "NIST Genome in a Bottle, benchmark v4.2.1 (GRCh38)",
+      "project_url": "https://www.nist.gov/programs-projects/genome-bottle",
+      "files": [
+        {
+          "role": "vcf",
+          "name": "HG002_GRCh38_1_22_v4.2.1_benchmark.vcf.gz",
+          "url": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG002_NA24385_son/NISTv4.2.1/GRCh38/HG002_GRCh38_1_22_v4.2.1_benchmark.vcf.gz",
+          "bytes": 156252944,
+          "sha256": "adb4d4a50048aa13353a06b84fcfcbca09a5d17525efaa4cea44f8822e81175c"
+        },
+        {
+          "role": "bed",
+          "name": "HG002_GRCh38_1_22_v4.2.1_benchmark.bed",
+          "url": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG002_NA24385_son/NISTv4.2.1/GRCh38/HG002_GRCh38_1_22_v4.2.1_benchmark_noinconsistent.bed",
+          "bytes": 11494021,
+          "sha256": "fba9a57c36ec88e5d14ea3e259c8866c7935f4998d3ec0fa2d6c3962da5b5575"
+        }
+      ],
+      "expected": {
+        "CYP2C19": "*1/*1 (Normal Metabolizer)",
+        "CYP2C9": "*1/*1 (Normal Metabolizer)",
+        "SLCO1B1": "*1/*1 (Normal Function)",
+        "NUDT15": "*1/*1 (Normal Metabolizer)",
+        "TPMT": "*1/*1 (Normal Metabolizer)",
+        "DPYD": "Reference/Reference (Normal Metabolizer)"
+      },
+      "variants": 4048342,
+      "zip_url": "https://github.com/surkanfuren/pharmageno/releases/download/test-genomes-v1/HG002.zip"
+    },
+    {
+      "id": "HG003",
+      "coriell": "NA24149",
+      "label": "Ashkenazi Jewish family \u00b7 father",
+      "project": "NIST Genome in a Bottle, benchmark v4.2.1 (GRCh38)",
+      "project_url": "https://www.nist.gov/programs-projects/genome-bottle",
+      "files": [
+        {
+          "role": "vcf",
+          "name": "HG003_GRCh38_1_22_v4.2.1_benchmark.vcf.gz",
+          "url": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG003_NA24149_father/NISTv4.2.1/GRCh38/HG003_GRCh38_1_22_v4.2.1_benchmark.vcf.gz",
+          "bytes": 147212428,
+          "sha256": "a4f8fefa826f8d2c9457eacf6f4b2f6bfa29daef429d570ce04254c5e7b1121e"
+        },
+        {
+          "role": "bed",
+          "name": "HG003_GRCh38_1_22_v4.2.1_benchmark.bed",
+          "url": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG003_NA24149_father/NISTv4.2.1/GRCh38/HG003_GRCh38_1_22_v4.2.1_benchmark_noinconsistent.bed",
+          "bytes": 13219856,
+          "sha256": "652afd3046705af3200f9c87c255fef11bb212dd76c75a19999c9b2df8a3180c"
+        }
+      ],
+      "expected": {
+        "CYP2C19": "*1/*17 (Rapid Metabolizer)",
+        "CYP2C9": "*1/*1 (Normal Metabolizer)",
+        "SLCO1B1": "*1/*1 (Normal Function)",
+        "NUDT15": "*1/*1 (Normal Metabolizer)",
+        "TPMT": "*1/*1 (Normal Metabolizer)",
+        "DPYD": "Reference/Reference (Normal Metabolizer)"
+      },
+      "variants": 4000097,
+      "zip_url": "https://github.com/surkanfuren/pharmageno/releases/download/test-genomes-v1/HG003.zip"
+    },
+    {
+      "id": "HG004",
+      "coriell": "NA24143",
+      "label": "Ashkenazi Jewish family \u00b7 mother",
+      "project": "NIST Genome in a Bottle, benchmark v4.2.1 (GRCh38)",
+      "project_url": "https://www.nist.gov/programs-projects/genome-bottle",
+      "files": [
+        {
+          "role": "vcf",
+          "name": "HG004_GRCh38_1_22_v4.2.1_benchmark.vcf.gz",
+          "url": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG004_NA24143_mother/NISTv4.2.1/GRCh38/HG004_GRCh38_1_22_v4.2.1_benchmark.vcf.gz",
+          "bytes": 148948118,
+          "sha256": "13c113d93eb2884ebb97573cbe558554d3fb0a8748a6d2263cf4616312ac14ff"
+        },
+        {
+          "role": "bed",
+          "name": "HG004_GRCh38_1_22_v4.2.1_benchmark.bed",
+          "url": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG004_NA24143_mother/NISTv4.2.1/GRCh38/HG004_GRCh38_1_22_v4.2.1_benchmark_noinconsistent.bed",
+          "bytes": 13081043,
+          "sha256": "88d1c926fdc8abd9c39b3e9fe2af3fc43dd67d284690a3dc6127b369d96bccad"
+        }
+      ],
+      "expected": {
+        "CYP2C19": "*1/*1 (Normal Metabolizer)",
+        "CYP2C9": "*1/*3 (Intermediate Metabolizer)",
+        "SLCO1B1": "*1/*1 (Normal Function)",
+        "NUDT15": "*1/*1 (Normal Metabolizer)",
+        "TPMT": "*1/*1 (Normal Metabolizer)",
+        "DPYD": "Reference/Reference (Normal Metabolizer)"
+      },
+      "variants": 4031346,
+      "zip_url": "https://github.com/surkanfuren/pharmageno/releases/download/test-genomes-v1/HG004.zip"
+    },
+    {
+      "id": "HG005",
+      "coriell": "NA24631",
+      "label": "Han Chinese family \u00b7 son",
+      "project": "NIST Genome in a Bottle, benchmark v4.2.1 (GRCh38)",
+      "project_url": "https://www.nist.gov/programs-projects/genome-bottle",
+      "files": [
+        {
+          "role": "vcf",
+          "name": "HG005_GRCh38_1_22_v4.2.1_benchmark.vcf.gz",
+          "url": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/ChineseTrio/HG005_NA24631_son/NISTv4.2.1/GRCh38/HG005_GRCh38_1_22_v4.2.1_benchmark.vcf.gz",
+          "bytes": 139334496,
+          "sha256": "42a86ee9bf1ea1b8e4ee6a352fc24d7a52b9030c62ee56baeb978e3dff475cf4"
+        },
+        {
+          "role": "bed",
+          "name": "HG005_GRCh38_1_22_v4.2.1_benchmark.bed",
+          "url": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/ChineseTrio/HG005_NA24631_son/NISTv4.2.1/GRCh38/HG005_GRCh38_1_22_v4.2.1_benchmark.bed",
+          "bytes": 18615340,
+          "sha256": "24141b618d3b33c1595e73c25e7958673a190482534bd28d0122af1f61758195"
+        }
+      ],
+      "expected": {
+        "CYP2C19": "*1/*1 (Normal Metabolizer)",
+        "CYP2C9": "*1/*1 (Normal Metabolizer)",
+        "SLCO1B1": "*1/*1 (Normal Function)",
+        "NUDT15": "*1/*3 (Intermediate Metabolizer)",
+        "TPMT": "*1/*1 (Normal Metabolizer)",
+        "DPYD": "Reference/Reference (Normal Metabolizer)"
+      },
+      "variants": 3856856,
+      "zip_url": "https://github.com/surkanfuren/pharmageno/releases/download/test-genomes-v1/HG005.zip"
+    },
+    {
+      "id": "HG006",
+      "coriell": "NA24694",
+      "label": "Han Chinese family \u00b7 father",
+      "project": "NIST Genome in a Bottle, benchmark v4.2.1 (GRCh38)",
+      "project_url": "https://www.nist.gov/programs-projects/genome-bottle",
+      "files": [
+        {
+          "role": "vcf",
+          "name": "HG006_GRCh38_1_22_v4.2.1_benchmark.vcf.gz",
+          "url": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/ChineseTrio/HG006_NA24694_father/NISTv4.2.1/GRCh38/HG006_GRCh38_1_22_v4.2.1_benchmark.vcf.gz",
+          "bytes": 117161667,
+          "sha256": "dde81deeebbd2601421ca3682f98b06987dbd3aef80b6a1a379ab77adfc96805"
+        },
+        {
+          "role": "bed",
+          "name": "HG006_GRCh38_1_22_v4.2.1_benchmark.bed",
+          "url": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/ChineseTrio/HG006_NA24694_father/NISTv4.2.1/GRCh38/HG006_GRCh38_1_22_v4.2.1_benchmark.bed",
+          "bytes": 15762527,
+          "sha256": "1140193050a4b9aa6bc4a057ff0dfc1b27613384a8400f9125cab6279df05510"
+        }
+      ],
+      "expected": {
+        "CYP2C19": "*1/*1 (Normal Metabolizer)",
+        "CYP2C9": "*1/*1 (Normal Metabolizer)",
+        "SLCO1B1": "*1/*1 (Normal Function)",
+        "NUDT15": "*1/*1 (Normal Metabolizer)",
+        "TPMT": "*1/*1 (Normal Metabolizer)",
+        "DPYD": "Reference/Reference (Normal Metabolizer)"
+      },
+      "variants": 3839315,
+      "zip_url": "https://github.com/surkanfuren/pharmageno/releases/download/test-genomes-v1/HG006.zip"
+    },
+    {
+      "id": "HG007",
+      "coriell": "NA24695",
+      "label": "Han Chinese family \u00b7 mother",
+      "project": "NIST Genome in a Bottle, benchmark v4.2.1 (GRCh38)",
+      "project_url": "https://www.nist.gov/programs-projects/genome-bottle",
+      "files": [
+        {
+          "role": "vcf",
+          "name": "HG007_GRCh38_1_22_v4.2.1_benchmark.vcf.gz",
+          "url": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/ChineseTrio/HG007_NA24695_mother/NISTv4.2.1/GRCh38/HG007_GRCh38_1_22_v4.2.1_benchmark.vcf.gz",
+          "bytes": 118171165,
+          "sha256": "b4b9aa464639d98fcbe189107df774beca7817ca30a216419d17c3cddc323429"
+        },
+        {
+          "role": "bed",
+          "name": "HG007_GRCh38_1_22_v4.2.1_benchmark.bed",
+          "url": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/ChineseTrio/HG007_NA24695_mother/NISTv4.2.1/GRCh38/HG007_GRCh38_1_22_v4.2.1_benchmark.bed",
+          "bytes": 16208979,
+          "sha256": "e8dcb609c8697c723b99daa14e7bf1d75d2c34eafa4d166c38d918a37013d4e9"
+        }
+      ],
+      "expected": {
+        "CYP2C19": "*1/*1 (Normal Metabolizer)",
+        "CYP2C9": "*1/*1 (Normal Metabolizer)",
+        "SLCO1B1": "*1/*1 (Normal Function)",
+        "NUDT15": "*1/*3 (Intermediate Metabolizer)",
+        "TPMT": "*1/*1 (Normal Metabolizer)",
+        "DPYD": "Reference/Reference (Normal Metabolizer)"
+      },
+      "variants": 3859704,
+      "zip_url": "https://github.com/surkanfuren/pharmageno/releases/download/test-genomes-v1/HG007.zip"
+    },
+    {
+      "id": "NA12877",
+      "coriell": "NA12877",
+      "label": "CEPH family 1463 (Utah) \u00b7 father",
+      "project": "Illumina Platinum Genomes 2017-1.0 (hg38)",
+      "project_url": "https://github.com/Illumina/PlatinumGenomes",
+      "files": [
+        {
+          "role": "vcf",
+          "name": "NA12877.vcf.gz",
+          "url": "https://s3.eu-central-1.amazonaws.com/platinum-genomes/2017-1.0/hg38/small_variants/NA12877/NA12877.vcf.gz",
+          "bytes": 36943942,
+          "sha256": "216efc0004ead0d8bc9382fd864a1ef8322070f915b3164465dec90f886ea882"
+        },
+        {
+          "role": "bed",
+          "name": "NA12877.ConfidentRegions.bed.gz",
+          "url": "https://s3.eu-central-1.amazonaws.com/platinum-genomes/2017-1.0/hg38/small_variants/ConfidentRegions.bed.gz",
+          "bytes": 19652231,
+          "sha256": "872288c5acc2da2e221661e2ad5bc58c51dbd2008a086d243f8e13e877480205"
+        }
+      ],
+      "expected": {
+        "CYP2C19": "*1/*1 (Normal Metabolizer)",
+        "CYP2C9": "*1/*1 (Normal Metabolizer)",
+        "SLCO1B1": "*1/*1 (Normal Function)",
+        "NUDT15": "*1/*1 (Normal Metabolizer)",
+        "TPMT": "*1/*1 (Normal Metabolizer)",
+        "DPYD": "Reference/Reference (Normal Metabolizer)"
+      },
+      "variants": 4147653,
+      "zip_url": "https://github.com/surkanfuren/pharmageno/releases/download/test-genomes-v1/NA12877.zip"
+    },
+    {
+      "id": "NA12879",
+      "coriell": "NA12879",
+      "label": "CEPH family 1463 (Utah) \u00b7 child of NA12877 and HG001",
+      "project": "Platinum Pedigree Consortium, small-variant truth set (GRCh38)",
+      "project_url": "https://github.com/Platinum-Pedigree-Consortium/Platinum-Pedigree-Datasets",
+      "files": [
+        {
+          "role": "vcf",
+          "name": "NA12879.GRCh38.vcf.gz",
+          "split_from": "https://platinum-pedigree-data.s3.amazonaws.com/variants/small_variant_truthset/GRCh38/CEPH1463.GRCh38.family-truthset.ov.vcf.gz",
+          "sample": "NA12879",
+          "bytes": 34524064,
+          "sha256": "e22eeef32e41fbf5449c99d8ef08e8fd50f4bfa28626753fdee78b92c6483dca"
+        },
+        {
+          "role": "bed",
+          "name": "hq_regions_final.bed.gz",
+          "url": "https://platinum-pedigree-data.s3.amazonaws.com/variants/small_variant_truthset/GRCh38/hq_regions_final.bed.gz",
+          "bytes": 6491418,
+          "sha256": "d7d0398a04a6de4c47c94fd7e44cea433d4a96574f4cfd15e5a29043adc5210b"
+        }
+      ],
+      "expected": {
+        "CYP2C19": "*1/*2 (Intermediate Metabolizer)",
+        "CYP2C9": "*1/*1 (Normal Metabolizer)",
+        "SLCO1B1": "*1/*1 (Normal Function)",
+        "NUDT15": "*1/*1 (Normal Metabolizer)",
+        "TPMT": "*1/*1 (Normal Metabolizer)",
+        "DPYD": "Reference/Reference (Normal Metabolizer)"
+      },
+      "variants": 4490952,
+      "zip_url": "https://github.com/surkanfuren/pharmageno/releases/download/test-genomes-v1/NA12879.zip"
+    },
+    {
+      "id": "NA12881",
+      "coriell": "NA12881",
+      "label": "CEPH family 1463 (Utah) \u00b7 child of NA12877 and HG001",
+      "project": "Platinum Pedigree Consortium, small-variant truth set (GRCh38)",
+      "project_url": "https://github.com/Platinum-Pedigree-Consortium/Platinum-Pedigree-Datasets",
+      "files": [
+        {
+          "role": "vcf",
+          "name": "NA12881.GRCh38.vcf.gz",
+          "split_from": "https://platinum-pedigree-data.s3.amazonaws.com/variants/small_variant_truthset/GRCh38/CEPH1463.GRCh38.family-truthset.ov.vcf.gz",
+          "sample": "NA12881",
+          "bytes": 34674649,
+          "sha256": "dec4e16d1ccb8ba01b933d992e61e9a1bc8e0619297de3b37574e7e3156da049"
+        },
+        {
+          "role": "bed",
+          "name": "hq_regions_final.bed.gz",
+          "url": "https://platinum-pedigree-data.s3.amazonaws.com/variants/small_variant_truthset/GRCh38/hq_regions_final.bed.gz",
+          "bytes": 6491418,
+          "sha256": "d7d0398a04a6de4c47c94fd7e44cea433d4a96574f4cfd15e5a29043adc5210b"
+        }
+      ],
+      "expected": {
+        "CYP2C19": "*1/*2 (Intermediate Metabolizer)",
+        "CYP2C9": "*1/*1 (Normal Metabolizer)",
+        "SLCO1B1": "*1/*5 (Decreased Function)",
+        "NUDT15": "*1/*1 (Normal Metabolizer)",
+        "TPMT": "*1/*1 (Normal Metabolizer)",
+        "DPYD": "Reference/Reference (Normal Metabolizer)"
+      },
+      "variants": 4513154,
+      "zip_url": "https://github.com/surkanfuren/pharmageno/releases/download/test-genomes-v1/NA12881.zip"
+    }
+  ]
+}

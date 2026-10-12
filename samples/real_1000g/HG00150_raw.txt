@@ -1,0 +1,18 @@
+# REAL DATA: 1000 Genomes Project phase 3 participant HG00150 (open-access, consented for public research use)
+# Genotypes retrieved via Ensembl REST /variation/human/<rsid>?genotypes=1; only the pharmacogene positions used by Gene Passport
+# rsid	chromosome	position	genotype
+rs1057910	.	.	AA
+rs1142345	.	.	CT
+rs116855232	.	.	CC
+rs12248560	.	.	CC
+rs1799853	.	.	TC
+rs1800460	.	.	TC
+rs1800462	.	.	CC
+rs3918290	.	.	CC
+rs4149056	.	.	TT
+rs4244285	.	.	GG
+rs4986893	.	.	GG
+rs55886062	.	.	AA
+rs56038477	.	.	TC
+rs67376798	.	.	TT
+rs75017182	.	.	CG

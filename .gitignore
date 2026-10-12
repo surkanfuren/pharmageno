@@ -1,0 +1,14 @@
+# Notes and documentation are kept outside the repository
+*.md
+# Local data (download with genomes/download.py; too large for git)
+genomes/data/
+genomes/zips/
+# Runtime state
+.data/
+.env
+__pycache__/
+.DS_Store
+# Local working files
+backup/
+samples/*.*
+samples/real/pdf/
